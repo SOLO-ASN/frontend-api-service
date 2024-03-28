@@ -1,16 +1,22 @@
 package main
 
 import (
-	"api-service/internal/server"
-	"github.com/gin-gonic/gin"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"api-service/config"
+	"api-service/internal/server"
+	"github.com/gin-gonic/gin"
 )
 
 const defaultHTTPAddr = "0.0.0.0:18080"
 
 func main() {
+
+	path := os.Getenv("CONFIG_PATH")
+	config.Init(path)
+
 	server := server.NewHTTPServer(defaultHTTPAddr,
 		server.WithMode(gin.DebugMode))
 	server.Start()
