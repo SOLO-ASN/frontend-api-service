@@ -2,6 +2,13 @@ package config
 
 import (
 	"errors"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/spf13/viper"
 )
 
 var (
@@ -14,6 +21,7 @@ var (
 
 var (
 	ErrFileNotFound = errors.New("config file not found")
+	ErrConfigParse  = errors.New("config parse error")
 )
 
 func Init(path string) {
@@ -55,9 +63,20 @@ type Redis struct {
 	Prefix        string   `yaml:"prefix" json:"prefix"`
 }
 
-type Logger struct{}
+type Logger struct {
+	Enable bool   `yaml:"enable" json:"enable"`
+	Format string `yaml:"format" json:"format"`
+	Level  string `yaml:"level" json:"level"`
+	Path   string `yaml:"path" json:"path"`
+}
 
 type Mysql struct {
+	Dsn             string        `yaml:"dsn" json:"dsn"`
+	MaxIdleConns    int           `yaml:"maxIdleConns" json:"maxIdleConns"`
+	MaxOpenConns    int           `yaml:"maxOpenConns" json:"maxOpenConns"`
+	SlowThreshold   time.Duration `yaml:"slowThreshold" json:"slowThreshold"`
+	ConnMaxLifetime time.Duration `yaml:"connMaxLifetime" json:"connMaxLifetime"`
+	EnableLog       bool          `yaml:"enableLog" json:"enableLog"`
 }
 
 type Middleware struct {
@@ -68,13 +87,29 @@ type Middleware struct {
 }
 
 func (c *Config) parse() error {
-	//TODO implement me
-	panic("implement me")
-	//f, err := os.Open(config_path)
-	//defer f.Close()
-	//if err != nil {
-	//	return ErrFileNotFound
-	//}
-	//
+	// check file exist
+	if _, err := os.Stat(config_path); os.IsNotExist(err) {
+		return ErrFileNotFound
+	}
+
+	// use viper
+	filePath, fileName := filepath.Split(config_path)
+	ext := strings.TrimLeft(path.Ext(fileName), ".")
+	fileName = strings.Replace(fileName, "."+ext, "", 1)
+
+	viper.AddConfigPath(filePath)
+	viper.AddConfigPath(".")
+	viper.SetConfigName(fileName)
+	viper.SetConfigType(ext)
+	err := viper.ReadInConfig()
+	if err != nil {
+		return ErrConfigParse
+	}
+
+	err = viper.Unmarshal(c)
+	if err != nil {
+		return ErrConfigParse
+	}
+
 	return nil
 }

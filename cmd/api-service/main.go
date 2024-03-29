@@ -1,23 +1,27 @@
 package main
 
 import (
+	"api-service/config"
+	"api-service/internal/server"
+	"flag"
+	"github.com/gin-gonic/gin"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"api-service/config"
-	"api-service/internal/server"
-	"github.com/gin-gonic/gin"
 )
 
-const defaultHTTPAddr = "0.0.0.0:18080"
+const defaultHTTPAddr = "127.0.0.1:18080"
 
 func main() {
 
-	path := os.Getenv("CONFIG_PATH")
-	config.Init(path)
+	config.Init(getConfigPath())
 
-	server := server.NewHTTPServer(defaultHTTPAddr,
+	host := defaultHTTPAddr
+	if cfg := config.Get(); cfg.App.Host != "" {
+		host = cfg.App.Host
+	}
+
+	server := server.NewHTTPServer(host,
 		server.WithMode(gin.DebugMode))
 	server.Start()
 
@@ -28,4 +32,18 @@ func main() {
 
 	server.Stop()
 	os.Exit(0)
+}
+
+func getConfigPath() string {
+	path := ""
+	path = os.Getenv("CONFIG_PATH")
+	if path != "" {
+		return path
+	}
+
+	// read "-c" flag
+	flag.StringVar(&path, "c", "", "config file path")
+	flag.Parse()
+
+	return path
 }
