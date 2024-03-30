@@ -7,7 +7,9 @@ require (
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/spf13/viper v1.18.2
+	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.2.4
 	go.uber.org/zap v1.27.0
+	gorm.io/driver/mysql v1.5.6
 	gorm.io/gorm v1.25.9
 )
 
@@ -25,6 +27,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
 	github.com/go-redis/redis/extra/rediscmd v0.2.0 // indirect
+	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
@@ -47,6 +50,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
+	github.com/uptrace/opentelemetry-go-extra/otelsql v0.2.4 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
