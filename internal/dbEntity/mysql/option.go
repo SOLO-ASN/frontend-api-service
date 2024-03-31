@@ -1,4 +1,4 @@
-package dbEntity
+package mysql
 
 import (
 	"time"

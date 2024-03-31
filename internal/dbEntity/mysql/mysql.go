@@ -1,7 +1,6 @@
-package dbEntity
+package mysql
 
 import (
-	"api-service/internal/middleware/logger"
 	"database/sql"
 	"errors"
 	"go.uber.org/zap/zapcore"
@@ -79,13 +78,14 @@ func gormConfig(o *option) *gorm.Config {
 		} else if o.logger == nil {
 			cfg.Logger = gormlogger.Default.LogMode(zapLogLevel2GormLogLevel(o.logLevel))
 		} else {
-			// todo implement me
-			cfg.Logger = logger.Init()
+			cfg.Logger = InitGormLogger(o)
 		}
 	}
 	return cfg
 }
 
+// zapLogLevel2GormLogLevel convert zapcore.Level to gormlogger.LogLevel
+// this sucks
 func zapLogLevel2GormLogLevel(level zapcore.Level) gormlogger.LogLevel {
 	switch level {
 	case zapcore.InfoLevel:
