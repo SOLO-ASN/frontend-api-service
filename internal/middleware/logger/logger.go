@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -52,7 +53,24 @@ func Init(opts ...OptionFn) *logger {
 }
 
 func (l *logger) log2File(fo *fileOption) {
-	//l.zLog = zap.New()
+	//new encoder config
+	cfg := getZapEncoderConfig(formatJSON)
+	// new encoder
+	var encoder zapcore.Encoder
+	if l.format == formatJSON {
+		encoder = zapcore.NewJSONEncoder(cfg)
+	} else {
+		encoder = zapcore.NewConsoleEncoder(cfg)
+	}
+
+	writeSyncer := zapcore.AddSync(&lumberjack.Logger{
+		Filename: fo.filename,
+		Compress: fo.isCompression,
+	})
+
+	core := zapcore.NewCore(encoder, writeSyncer, getZapLevel(l.level))
+
+	l.zLog = zap.New(core, zap.AddCaller())
 }
 
 func (l *logger) log2Console() {
@@ -60,12 +78,7 @@ func (l *logger) log2Console() {
 		Level:         zap.NewAtomicLevelAt(getZapLevel(l.level)),
 		EncoderConfig: zap.NewProductionEncoderConfig(),
 	}
-	if l.format == formatConsole {
-		cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	} else {
-		cfg.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-	}
-	cfg.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+	cfg.EncoderConfig = getZapEncoderConfig(l.format)
 	zLog, err := cfg.Build()
 	if err != nil {
 		panic(err)
@@ -86,4 +99,15 @@ func getZapLevel(level string) zapcore.Level {
 	default:
 		return zapcore.InfoLevel
 	}
+}
+
+func getZapEncoderConfig(format string) zapcore.EncoderConfig {
+	cfg := zap.NewProductionEncoderConfig()
+	cfg.EncodeTime = zapcore.RFC3339TimeEncoder
+	if format == formatConsole {
+		cfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	} else {
+		cfg.EncodeLevel = zapcore.CapitalLevelEncoder
+	}
+	return cfg
 }

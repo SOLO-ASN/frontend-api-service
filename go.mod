@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/spf13/viper v1.18.2
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.2.4
 	go.uber.org/zap v1.27.0
@@ -14,6 +15,7 @@ require (
 )
 
 require (
+	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
@@ -63,5 +65,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
