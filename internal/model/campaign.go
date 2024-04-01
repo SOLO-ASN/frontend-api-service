@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Campaign struct {
 	Model
 	ID                    string              `gorm:"column:id;type:varchar(50);primary_key" json:"id"`
@@ -22,12 +24,12 @@ type Campaign struct {
 	RequirementInfo       string              `gorm:"column:requirement_info" json:"requirementInfo"`
 	Description           string              `gorm:"column:description" json:"description"`
 	Chain                 string              `gorm:"column:chain;type:varchar(255);NOT NULL" json:"chain"`
-	StartTime             int                 `gorm:"column:start_time;NOT NULL" json:"startTime"`
+	StartTime             time.Time           `gorm:"column:start_time;NOT NULL" json:"startTime"`
 	Status                string              `gorm:"column:status;type:varchar(255);NOT NULL" json:"status"`
 	RequireEmail          bool                `gorm:"column:require_email;NOT NULL" json:"requireEmail"`
 	RequireUsername       bool                `gorm:"column:require_username;NOT NULL" json:"requireUsername"`
 	DistributionType      string              `gorm:"column:distribution_type;type:varchar(255);NOT NULL" json:"distributionType"`
-	EndTime               int                 `gorm:"column:end_time;NOT NULL" json:"endTime"`
+	EndTime               time.Time           `gorm:"column:end_time;NOT NULL" json:"endTime"`
 	Cap                   int                 `gorm:"column:cap;NOT NULL" json:"cap"`
 	LoyaltyPoints         int                 `gorm:"column:loyalty_points;NOT NULL" json:"loyaltyPoints"`
 	TokenRewardContract   TokenRewardContract `gorm:"column:token_reward_contract" json:"tokenRewardContract"`
