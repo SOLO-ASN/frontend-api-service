@@ -1,10 +1,11 @@
 app:
   name: "Solo-Mission-Api-Service"
   host: "127.0.0.1:18080"
+  env: "release" # should be debug, release, test
 
 logger:
-  enable: false
-  format: "json"
+  isSave: false
+  format: "console"
   level: "info"
   path: "./logs/log"
 

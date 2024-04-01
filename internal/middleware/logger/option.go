@@ -48,7 +48,7 @@ func WithLevel(levelName string) OptionFn {
 }
 
 // WithEncoding set the output log format, console or json
-func WithEncoding(format string) OptionFn {
+func WithFormat(format string) OptionFn {
 	return func(opt *option) {
 		switch format {
 		case formatJSON, formatConsole:

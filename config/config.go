@@ -53,6 +53,7 @@ type Config struct {
 type App struct {
 	Name string `yaml:"name" json:"name"`
 	Host string `yaml:"host" json:"host"`
+	Env  string `yaml:"env" json:"env"`
 }
 
 type Redis struct {
@@ -64,7 +65,7 @@ type Redis struct {
 }
 
 type Logger struct {
-	Enable bool   `yaml:"enable" json:"enable"`
+	IsSave bool   `yaml:"isSave" json:"isSave"`
 	Format string `yaml:"format" json:"format"`
 	Level  string `yaml:"level" json:"level"`
 	Path   string `yaml:"path" json:"path"`

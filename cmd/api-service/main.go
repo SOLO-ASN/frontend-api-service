@@ -2,9 +2,10 @@ package main
 
 import (
 	"api-service/config"
+	"api-service/internal/middleware/logger"
 	"api-service/internal/server"
 	"flag"
-	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,6 +16,14 @@ const defaultHTTPAddr = "127.0.0.1:18080"
 func main() {
 
 	config.Init(getConfigPath())
+	cfg := config.Get()
+
+	_ = logger.Init(
+		logger.WithLevel(cfg.Logger.Level),
+		logger.WithFormat(cfg.Logger.Format),
+		logger.WithSaveToFile(cfg.Logger.IsSave),
+	)
+
 
 	host := defaultHTTPAddr
 	if cfg := config.Get(); cfg.App.Host != "" {
@@ -22,7 +31,7 @@ func main() {
 	}
 
 	server := server.NewHTTPServer(host,
-		server.WithMode(gin.DebugMode))
+		server.WithMode(cfg.App.Env))
 	server.Start()
 
 	var quit chan os.Signal

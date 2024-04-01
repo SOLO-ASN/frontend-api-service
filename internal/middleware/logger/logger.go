@@ -75,8 +75,11 @@ func (l *logger) log2File(fo *fileOption) {
 
 func (l *logger) log2Console() {
 	cfg := zap.Config{
-		Level:         zap.NewAtomicLevelAt(getZapLevel(l.level)),
-		EncoderConfig: zap.NewProductionEncoderConfig(),
+		Level:            zap.NewAtomicLevelAt(getZapLevel(l.level)),
+		Encoding:         formatConsole,
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stdout"},
+		EncoderConfig:    zap.NewProductionEncoderConfig(),
 	}
 	cfg.EncoderConfig = getZapEncoderConfig(l.format)
 	zLog, err := cfg.Build()
@@ -109,5 +112,6 @@ func getZapEncoderConfig(format string) zapcore.EncoderConfig {
 	} else {
 		cfg.EncodeLevel = zapcore.CapitalLevelEncoder
 	}
+	//cfg.EncodeName = zapcore.name
 	return cfg
 }
