@@ -57,6 +57,10 @@ func WithLogEnable() OptionFn {
 	return func(o *option) { o.enableLog = true }
 }
 
+func WithLogger(logger *zap.Logger) OptionFn {
+	return func(o *option) { o.logger = logger }
+}
+
 func WithLogTrace() OptionFn {
 	return func(o *option) { o.enableTrace = true }
 }

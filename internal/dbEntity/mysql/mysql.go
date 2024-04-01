@@ -22,15 +22,15 @@ var (
 type Mysql struct {
 }
 
-func initMysql(dns string, opts ...OptionFn) (*gorm.DB, error) {
+func Init(dns string, opts ...OptionFn) (*gorm.DB, error) {
 	// get default mysql options
 	opt := defaultOption()
 	opt.apply(opts...)
 
 	//
-	sql, err := sql.Open("mysql-driver", dns)
+	sql, err := sql.Open("mysql", dns)
 	if err != nil {
-		return nil, ErrCreateMysql
+		return nil, err
 	}
 	sql.SetMaxIdleConns(opt.maxIdleConns)
 	sql.SetMaxOpenConns(opt.maxOpenConns)

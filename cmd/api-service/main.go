@@ -3,6 +3,7 @@ package main
 import (
 	"api-service/config"
 	"api-service/internal/middleware/logger"
+	"api-service/internal/model"
 	"api-service/internal/server"
 	"flag"
 	"go.uber.org/zap"
@@ -18,12 +19,16 @@ func main() {
 	config.Init(getConfigPath())
 	cfg := config.Get()
 
+	// init logger
 	_ = logger.Init(
 		logger.WithLevel(cfg.Logger.Level),
 		logger.WithFormat(cfg.Logger.Format),
 		logger.WithSaveToFile(cfg.Logger.IsSave),
 	)
 
+
+	// init mysql
+	model.InitMysql()
 
 	host := defaultHTTPAddr
 	if cfg := config.Get(); cfg.App.Host != "" {
