@@ -53,42 +53,42 @@ func (o *option) apply(opts ...OptionFn) {
 	}
 }
 
-func (o *option) WithLogEnable() OptionFn {
+func WithLogEnable() OptionFn {
 	return func(o *option) { o.enableLog = true }
 }
 
-func (o *option) WithLogTrace() OptionFn {
+func WithLogTrace() OptionFn {
 	return func(o *option) { o.enableTrace = true }
 }
 
-func (o *option) WithSlowThreshold(threshold time.Duration) OptionFn {
+func WithSlowThreshold(threshold time.Duration) OptionFn {
 	return func(o *option) { o.slowThreshold = threshold }
 }
 
-func (o *option) WithMaxIdleConns(conns int) OptionFn {
+func WithMaxIdleConns(conns int) OptionFn {
 	return func(o *option) { o.maxIdleConns = conns }
 }
 
-func (o *option) WithMaxOpenConns(conns int) OptionFn {
+func WithMaxOpenConns(conns int) OptionFn {
 	return func(o *option) { o.maxOpenConns = conns }
 }
 
-func (o *option) WithMaxLifetime(time time.Duration) OptionFn {
+func WithMaxLifetime(time time.Duration) OptionFn {
 	return func(o *option) { o.conMaxLifetime = time }
 }
 
-func (o *option) WithLogLevel(level zapcore.Level) OptionFn {
+func WithLogLevel(level zapcore.Level) OptionFn {
 	return func(o *option) { o.logLevel = level }
 }
 
-func (o *option) WithLogPath(path string) OptionFn {
+func WithLogPath(path string) OptionFn {
 	return func(o *option) { o.logFilePath = path }
 }
 
-func (o *option) WithRWCluster(slaves []string, masters []string) OptionFn {
+func WithRWCluster(slaves []string, masters []string) OptionFn {
 	return func(o *option) { o.slaveDsn = slaves; o.masterDsn = masters }
 }
 
-func (o *option) WithPlugins(plugins ...gorm.Plugin) OptionFn {
+func WithPlugins(plugins ...gorm.Plugin) OptionFn {
 	return func(o *option) { o.plugins = plugins }
 }
