@@ -1,0 +1,27 @@
+package model
+
+type Space struct {
+	Model
+	ID               string            `gorm:"column:id;type:varchar(50);primary_key" json:"id"`
+	Name             string            `gorm:"column:name;type:varchar(50);NOT NULL" json:"name"`
+	Thumbnail        string            `gorm:"column:thumbnail;type:varchar(255);NOT NULL" json:"thumbnail"`
+	Alias            string            `gorm:"column:alias;type:varchar(50);NOT NULL" json:"alias"` //别名是否可以不要
+	IsVerified       bool              `gorm:"column:is_verified" json:"isVerified"`
+	Info             string            `gorm:"column:info" json:"info"`
+	TgeInfo          TgeInfo           `gorm:"embedded;embeddedPrefix:tge_info" json:"tgeInfo"`
+	Links            datatypes.JSONMap `gorm:"column:links" json:"links"`
+	Status           string            `gorm:"column:status;type:varchar(50)" json:"status"`
+	FollowersCount   int               `gorm:"column:followers_count" json:"followersCount"`
+	FollowersRank    string            `gorm:"column:followers_rank;type:varchar(50)" json:"followersRank"`
+	Backers          datatypes.JSON    `gorm:"column:backers" json:"backers"`
+	Categories       datatypes.JSON    `gorm:"column:categories" json:"categories"`
+	Token            Token             `gorm:"embedded;embeddedPrefix:token_" json:"token"`
+	DiscordGuildID   string            `gorm:"column:discord_guild_id;type:varchar(50)" json:"discordGuildID"`
+	DiscordGuildInfo DiscordGuildInfo  `gorm:"embedded;embeddedPrefix:discord_guild_info_" json:"discordGuildInfo"`
+	Banner           string            `gorm:"column:banner;type:varchar(255)" json:"banner"`
+	SeoImage         string            `gorm:"column:seo_image;type:varchar(255)" json:"seoImage"`
+}
+
+func (s *Space) TableName() string {
+	return "space"
+}

@@ -27,5 +27,5 @@ type AptosChainAddress struct {
 }
 
 func (b *ChainAddress) TableName() string {
-	return "chain_address"
+	return "chainAddress"
 }
