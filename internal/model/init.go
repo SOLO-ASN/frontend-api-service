@@ -19,6 +19,7 @@ var (
 )
 
 func InitMysql() {
+	// get default mysql options
 	opts := []mysql.OptionFn{
 		mysql.WithMaxIdleConns(10),
 		mysql.WithMaxOpenConns(100),
@@ -35,13 +36,21 @@ func InitMysql() {
 	var err error
 	db, err = mysql.Init(config.Get().Mysql.Dsn, opts...)
 	if err != nil {
-		panic("generate mysql error: " + err.Error())
+		logger.DefaultLogger().Error("Init mysql error: " + err.Error())
+	}
+
+	migrateErr := db.AutoMigrate(&User{})
+	if migrateErr != nil {
+		logger.DefaultLogger().Error("migrate mysql error: " + migrateErr.Error())
 	}
 }
 
-func GetDb() (*gorm.DB, error) {
-	if db == nil {
-		return nil, ErrGetMysql
+func GetDb(init bool) *gorm.DB {
+	if db == nil && init {
+		InitMysql()
 	}
-	return db, nil
+	return db
+}
+
+	}
 }
