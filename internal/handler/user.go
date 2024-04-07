@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"net/http"
+	"strings"
+
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/middleware/logger"
 	"api-service/internal/model"
@@ -9,7 +12,6 @@ import (
 	"api-service/internal/types"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 type IUserHandler interface {
@@ -148,23 +150,21 @@ func (u *userHandler) Create(c *gin.Context) {
 	user.Avatar = form.Avatar
 	user.Email = form.Email
 
-	if u.retriever.CheckDuplicateName(c, user) {
-		response.Error(c, response.ErrMessage{
-			Code:    http.StatusBadRequest,
-			Message: "user name duplicated",
-		})
-		logger.DefaultLogger().Error("user name duplicated", zap.String("name", form.Name))
-		return
-	}
-
 	err = u.retriever.Create(c, user)
 
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
-		response.Error(c, response.ErrMessage{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		})
+		if strings.Contains(err.Error(), "Error 1062") {
+			response.Error(c, response.ErrMessage{ // todo refactor
+				Code:    31062,
+				Message: "duplicated user name",
+			})
+		} else {
+			response.Error(c, response.ErrMessage{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
+		}
 		return
 	}
 
