@@ -3,14 +3,15 @@ package mysql
 import (
 	"database/sql"
 	"errors"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
+	"go.uber.org/zap/zapcore"
 	dmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 var (
@@ -65,7 +66,12 @@ func Init(dns string, opts ...OptionFn) (*gorm.DB, error) {
 }
 
 func gormConfig(o *option) *gorm.Config {
-	cfg := &gorm.Config{}
+	cfg := &gorm.Config{
+		// todo make this configurable
+		DisableForeignKeyConstraintWhenMigrating: true,
+		//
+		NamingStrategy: schema.NamingStrategy{SingularTable: true},
+	}
 	if o.enableLog {
 		if o.slowThreshold > 0 {
 			cfg.Logger = gormlogger.New(
