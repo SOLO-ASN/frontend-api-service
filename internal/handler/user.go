@@ -62,7 +62,7 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 			TelegramAccountId:   form.TelegramAccount.Id,
 			TelegramAccountName: form.TelegramAccount.Name,
 		}}
-	u.retriever.UpdateSocialAccountById(c, sAccount)
+	err = u.retriever.UpdateSocialAccountById(c, sAccount)
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
 		response.Error(c, response.ErrMessage{
