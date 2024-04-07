@@ -1,36 +1,153 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"api-service/internal/dbEntity/cache"
+	"api-service/internal/middleware/logger"
+	"api-service/internal/model"
+	"api-service/internal/response"
+	"api-service/internal/retriever"
+	"api-service/internal/types"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"net/http"
+)
 
 type IUserHandler interface {
+	CheckDuplicate(c *gin.Context)
 	Create(c *gin.Context)
 	UpdateById(c *gin.Context)
 	GetById(c *gin.Context)
+	UpdateSocialAccountById(c *gin.Context)
+	UpdateAddressById(c *gin.Context)
 	DeleteById(c *gin.Context)
 }
 
 func NewUserHandler() IUserHandler {
-	return &userHandler{}
+	return &userHandler{
+		retriever: retriever.NewUserRetriever(
+			model.GetDb(false),
+			cache.Cache{},
+		),
+	}
 }
 
-type userHandler struct{}
+type userHandler struct {
+	retriever retriever.UserRetriever
+}
 
-func (u userHandler) Create(c *gin.Context) {
+func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
+	//TODO implement me
+	form := &types.UpdateSocialAccountRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+	//
+	sAccount := &model.User{
+		Model: model.Model{
+			ID: c.GetString("uuid"),
+		},
+		SocialAccount: model.SocialAccount{
+			XAccountId:          form.XAccount.Id,
+			XAccountName:        form.XAccount.Name,
+			GithubAccountId:     form.GithubAccount.Id,
+			GithubAccountName:   form.GithubAccount.Name,
+			DiscordAccountId:    form.DiscordAccount.Id,
+			DiscordAccountName:  form.DiscordAccount.Name,
+			TelegramAccountId:   form.TelegramAccount.Id,
+			TelegramAccountName: form.TelegramAccount.Name,
+		}}
+	u.retriever.UpdateSocialAccountById(c, sAccount)
+	if err != nil {
+		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Success(c, gin.H{"status": "update success"})
+}
+
+func (u *userHandler) UpdateAddressById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (u userHandler) UpdateById(c *gin.Context) {
+func (u *userHandler) CheckDuplicate(c *gin.Context) {
+	form := &types.CheckDuplicateRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+	user := &model.User{}
+	user.Name = form.Name
+
+	logger.DefaultLogger().Info("check user name duplicated", zap.String("name", form.Name))
+
+	response.Success(c, gin.H{
+		"duplicated_name": u.retriever.CheckDuplicateName(c, user),
+	})
+}
+
+func (u *userHandler) Create(c *gin.Context) {
+	//TODO implement me
+	form := &types.CreateUserRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		logger.DefaultLogger().Warn("BindJSON error: ", zap.Error(err))
+		c.JSON(32001, "invalid params") // todo refactor
+		return
+	}
+	//
+	user := &model.User{}
+	user.Name = form.Name
+	user.Avatar = form.Avatar
+	user.Email = form.Email
+
+	if u.retriever.CheckDuplicateName(c, user) {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusBadRequest,
+			Message: "user name duplicated",
+		})
+		logger.DefaultLogger().Error("user name duplicated", zap.String("name", form.Name))
+		return
+	}
+
+	err = u.retriever.Create(c, user)
+
+	if err != nil {
+		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Success(c, gin.H{"uuid": user.ID})
+}
+
+func (u *userHandler) UpdateById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (u userHandler) GetById(c *gin.Context) {
+func (u *userHandler) GetById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (u userHandler) DeleteById(c *gin.Context) {
+func (u *userHandler) DeleteById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }

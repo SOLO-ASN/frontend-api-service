@@ -3,7 +3,6 @@ package routers
 import (
 	"api-service/internal/handler"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func init() {
@@ -15,22 +14,18 @@ func init() {
 func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	// todo if you want to add jwt auth, you can add it here.
 	// like this: rg.Use(jwtMiddleware.MiddlewareFunc())
-	rg.Use(func(c *gin.Context) {})
+	rg.Use(func(c *gin.Context) { c.Set("uuid", "8dd97aca-a279-4438-b0b0-588601ffcd6e") })
 
-	// test test test
-	// todo delete me
-	rg.GET("/status", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
-		})
-	})
-
+	// check username duplicate
+	rg.POST("/check", h.CheckDuplicate)
 	// add new user
-	rg.POST("/user", h.Create)
+	rg.POST("", h.Create)
 	// update user
-	rg.PUT("/user/:id", h.UpdateById)
+	rg.POST("/update/socialAccount", h.UpdateSocialAccountById)
+	// update user
+	rg.POST("/update/address", h.UpdateAddressById)
 	// delete user
-	rg.DELETE("/user/:id", h.DeleteById)
+	rg.DELETE("/delete", h.DeleteById)
 	// get user
-	rg.GET("/user/:id", h.GetById)
+	rg.POST("/info", h.GetById)
 }
