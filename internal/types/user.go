@@ -28,3 +28,9 @@ type x struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type UpdateEmailRequest struct {
+	Address          string `json:"address" binding:""`
+	Email            string `json:"email" binding:""`
+	VerificationCode string `json:"verificationCode" binding:""`
+}

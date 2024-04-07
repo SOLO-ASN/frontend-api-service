@@ -18,6 +18,7 @@ type IUserHandler interface {
 	UpdateById(c *gin.Context)
 	GetById(c *gin.Context)
 	UpdateSocialAccountById(c *gin.Context)
+	UpdateEmailById(c *gin.Context)
 	UpdateAddressById(c *gin.Context)
 	DeleteById(c *gin.Context)
 }
@@ -72,6 +73,39 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"status": "update success"})
+}
+
+func (u *userHandler) UpdateEmailById(c *gin.Context) {
+	// todo implement me
+	form := &types.UpdateEmailRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+
+	// todo verify address and verification code
+
+	// update email
+	e := &model.User{
+		Model: model.Model{
+			ID: c.GetString("uuid"),
+		},
+		Email: form.Email,
+	}
+	err = u.retriever.UpdateEmailById(c, e)
+	if err != nil {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusInternalServerError,
+			Message: "update email error",
+		})
+	}
+
+	response.Success(c, gin.H{"status": "update success"})
+
 }
 
 func (u *userHandler) UpdateAddressById(c *gin.Context) {
