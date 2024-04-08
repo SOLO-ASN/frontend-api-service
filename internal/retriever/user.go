@@ -14,6 +14,7 @@ type UserRetriever interface {
 	GetByName(ctx context.Context, name string) (*model.User, error)
 	CheckDuplicateName(ctx context.Context, table *model.User) bool
 	UpdateSocialAccountById(ctx context.Context, table *model.User) error
+	UpdateEmailById(ctx context.Context, table *model.User) error
 	UpdateById(ctx context.Context, table *model.User) error
 	DeleteById(ctx context.Context, uuid string) error
 }
@@ -84,6 +85,20 @@ func (u userRetriever) UpdateSocialAccountById(ctx context.Context, table *model
 		updates["telegram_account_name"] = table.SocialAccount.TelegramAccountName
 	}
 	if err := u.db.Model(table).Where("id = ?", table.ID).Updates(updates).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u userRetriever) UpdateEmailById(ctx context.Context, table *model.User) error {
+	updates := make(map[string]interface{})
+
+	// check
+	if table.Email != "" {
+		updates["email"] = table.Email
+	}
+
+	if err := u.db.Model(table).Where("id =?", table.ID).Updates(updates).Error; err != nil {
 		return err
 	}
 	return nil

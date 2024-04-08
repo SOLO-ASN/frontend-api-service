@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"net/http"
+	"strings"
+
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/middleware/logger"
 	"api-service/internal/model"
@@ -9,7 +12,6 @@ import (
 	"api-service/internal/types"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 type IUserHandler interface {
@@ -18,6 +20,7 @@ type IUserHandler interface {
 	UpdateById(c *gin.Context)
 	GetById(c *gin.Context)
 	UpdateSocialAccountById(c *gin.Context)
+	UpdateEmailById(c *gin.Context)
 	UpdateAddressById(c *gin.Context)
 	DeleteById(c *gin.Context)
 }
@@ -61,7 +64,7 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 			TelegramAccountId:   form.TelegramAccount.Id,
 			TelegramAccountName: form.TelegramAccount.Name,
 		}}
-	u.retriever.UpdateSocialAccountById(c, sAccount)
+	err = u.retriever.UpdateSocialAccountById(c, sAccount)
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
 		response.Error(c, response.ErrMessage{
@@ -72,6 +75,39 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"status": "update success"})
+}
+
+func (u *userHandler) UpdateEmailById(c *gin.Context) {
+	// todo implement me
+	form := &types.UpdateEmailRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+
+	// todo verify address and verification code
+
+	// update email
+	e := &model.User{
+		Model: model.Model{
+			ID: c.GetString("uuid"),
+		},
+		Email: form.Email,
+	}
+	err = u.retriever.UpdateEmailById(c, e)
+	if err != nil {
+		response.Error(c, response.ErrMessage{
+			Code:    http.StatusInternalServerError,
+			Message: "update email error",
+		})
+	}
+
+	response.Success(c, gin.H{"status": "update success"})
+
 }
 
 func (u *userHandler) UpdateAddressById(c *gin.Context) {
@@ -114,23 +150,21 @@ func (u *userHandler) Create(c *gin.Context) {
 	user.Avatar = form.Avatar
 	user.Email = form.Email
 
-	if u.retriever.CheckDuplicateName(c, user) {
-		response.Error(c, response.ErrMessage{
-			Code:    http.StatusBadRequest,
-			Message: "user name duplicated",
-		})
-		logger.DefaultLogger().Error("user name duplicated", zap.String("name", form.Name))
-		return
-	}
-
 	err = u.retriever.Create(c, user)
 
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
-		response.Error(c, response.ErrMessage{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		})
+		if strings.Contains(err.Error(), "Error 1062") {
+			response.Error(c, response.ErrMessage{ // todo refactor
+				Code:    31062,
+				Message: "duplicated user name",
+			})
+		} else {
+			response.Error(c, response.ErrMessage{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
+		}
 		return
 	}
 

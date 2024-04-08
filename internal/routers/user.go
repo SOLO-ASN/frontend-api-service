@@ -14,14 +14,16 @@ func init() {
 func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	// todo if you want to add jwt auth, you can add it here.
 	// like this: rg.Use(jwtMiddleware.MiddlewareFunc())
-	rg.Use(func(c *gin.Context) { c.Set("uuid", "8dd97aca-a279-4438-b0b0-588601ffcd6e") })
+	rg.Use(func(c *gin.Context) { c.Set("uuid", "68decb8d-944c-403a-b010-a342b0d9d5c3") })
 
 	// check username duplicate
 	rg.POST("/check", h.CheckDuplicate)
 	// add new user
 	rg.POST("", h.Create)
-	// update user
+	// update user's social account
 	rg.POST("/update/socialAccount", h.UpdateSocialAccountById)
+	// update user's email
+	rg.POST("/update/email", h.UpdateEmailById)
 	// update user
 	rg.POST("/update/address", h.UpdateAddressById)
 	// delete user
