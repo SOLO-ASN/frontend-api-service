@@ -43,7 +43,7 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 	form := &types.UpdateSocialAccountRequest{}
 	err := c.ShouldBindJSON(form)
 	if err != nil {
-		response.Error(c, response.ErrMessage{
+		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusBadRequest,
 			Message: "invalid request parameters",
 		}, err)
@@ -67,7 +67,7 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 	err = u.retriever.UpdateSocialAccountById(c, sAccount)
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
-		response.Error(c, response.ErrMessage{
+		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
@@ -82,7 +82,7 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 	form := &types.UpdateEmailRequest{}
 	err := c.ShouldBindJSON(form)
 	if err != nil {
-		response.Error(c, response.ErrMessage{
+		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusBadRequest,
 			Message: "invalid request parameters",
 		}, err)
@@ -100,7 +100,7 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 	}
 	err = u.retriever.UpdateEmailById(c, e)
 	if err != nil {
-		response.Error(c, response.ErrMessage{
+		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusInternalServerError,
 			Message: "update email error",
 		})
@@ -119,7 +119,7 @@ func (u *userHandler) CheckDuplicate(c *gin.Context) {
 	form := &types.CheckDuplicateRequest{}
 	err := c.ShouldBindJSON(form)
 	if err != nil {
-		response.Error(c, response.ErrMessage{
+		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusBadRequest,
 			Message: "invalid request parameters",
 		}, err)
@@ -155,12 +155,12 @@ func (u *userHandler) Create(c *gin.Context) {
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
 		if strings.Contains(err.Error(), "Error 1062") {
-			response.Error(c, response.ErrMessage{ // todo refactor
+			response.Error(c, response.WithCodeMessage{ // todo refactor
 				Code:    31062,
 				Message: "duplicated user name",
 			})
 		} else {
-			response.Error(c, response.ErrMessage{
+			response.Error(c, response.WithCodeMessage{
 				Code:    http.StatusInternalServerError,
 				Message: err.Error(),
 			})

@@ -16,8 +16,14 @@ var (
 	group_Space      []func(rg *gin.RouterGroup)
 	group_Space_Path = "/space"
 
+	group_Spaces      []func(rg *gin.RouterGroup)
+	group_Spaces_Path = "/spaces"
+
 	group_Explore      []func(rg *gin.RouterGroup)
 	group_Explore_Path = "/explore"
+
+	group_Campaign      []func(rg *gin.RouterGroup)
+	group_Campaign_Path = "/campaigns"
 )
 
 func NewRouter() *gin.Engine {
@@ -51,7 +57,9 @@ func NewRouter() *gin.Engine {
 
 	regRouters(r, base_path+group_UserId_Path, group_UserId)
 	regRouters(r, base_path+group_Space_Path, group_Space)
+	regRouters(r, base_path+group_Spaces_Path, group_Spaces)
 	regRouters(r, base_path+group_Explore_Path, group_Explore)
+	regRouters(r, base_path+group_Campaign_Path, group_Campaign)
 
 	return r
 }
