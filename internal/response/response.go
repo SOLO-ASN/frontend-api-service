@@ -14,36 +14,30 @@ type Result struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
-type ErrMessage struct {
+type WithCodeMessage struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func Success(c *gin.Context, data interface{}) {
+func OutPut(c *gin.Context, cm WithCodeMessage, data ...interface{}) {
 	resp := &Result{
-		Code: 62001,
-		Msg:  "success",
+		Code: cm.Code,
+		Msg:  cm.Message,
 	}
 	if data == nil {
 		resp.Data = &struct{}{}
 	} else {
-		resp.Data = data
+		resp.Data = data[0]
 	}
-
 	writeJSON(c, http.StatusOK, resp)
 }
 
-func Error(c *gin.Context, err ErrMessage, data ...interface{}) {
-	resp := &Result{
-		Code: err.Code,
-		Msg:  err.Message,
-	}
-	if data == nil {
-		resp.Data = &struct{}{}
-	} else {
-		resp.Data = data
-	}
-	writeJSON(c, http.StatusOK, resp)
+func Success(c *gin.Context, data ...interface{}) {
+	OutPut(c, WithCodeMessage{Code: 62001, Message: "success"}, data...)
+}
+
+func Error(c *gin.Context, err WithCodeMessage, data ...interface{}) {
+	OutPut(c, err, data...)
 }
 
 func writeJSON(c *gin.Context, code int, data interface{}) {
