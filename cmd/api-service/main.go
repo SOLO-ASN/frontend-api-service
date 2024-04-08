@@ -1,15 +1,15 @@
 package main
 
 import (
+	"flag"
+	"os"
+	"os/signal"
+	"syscall"
+	
 	"api-service/config"
 	"api-service/internal/middleware/logger"
 	"api-service/internal/model"
 	"api-service/internal/server"
-	"flag"
-	"go.uber.org/zap"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 const defaultHTTPAddr = "127.0.0.1:18080"
