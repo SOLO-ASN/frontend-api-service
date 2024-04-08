@@ -51,6 +51,3 @@ func GetDb(init bool) *gorm.DB {
 	}
 	return db
 }
-
-	}
-}
