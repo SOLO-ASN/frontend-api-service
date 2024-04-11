@@ -2,6 +2,7 @@ package routers
 
 import (
 	"api-service/config"
+	"api-service/internal/middleware"
 
 	"api-service/internal/handler"
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,8 @@ func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	// use cors middleware
+	r.Use(middleware.Cors())
 
 	r.GET(base_path+"/health", handler.CheckHealth)
 
