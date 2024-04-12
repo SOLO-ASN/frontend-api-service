@@ -2,8 +2,9 @@ package routers
 
 import (
 	"api-service/config"
-
 	"api-service/internal/handler"
+	"api-service/internal/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,13 +24,18 @@ var (
 	group_Explore_Path = "/explore"
 
 	group_Campaign      []func(rg *gin.RouterGroup)
-	group_Campaign_Path = "/campaigns"
+	group_Campaign_Path = "/campaign"
+
+	group_Campaigns      []func(rg *gin.RouterGroup)
+	group_Campaigns_Path = "/campaigns"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	// use cors middleware
+	r.Use(middleware.Cors())
 
 	r.GET(base_path+"/health", handler.CheckHealth)
 
@@ -60,6 +66,7 @@ func NewRouter() *gin.Engine {
 	regRouters(r, base_path+group_Spaces_Path, group_Spaces)
 	regRouters(r, base_path+group_Explore_Path, group_Explore)
 	regRouters(r, base_path+group_Campaign_Path, group_Campaign)
+	regRouters(r, base_path+group_Campaigns_Path, group_Campaigns)
 
 	return r
 }

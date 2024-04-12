@@ -26,7 +26,6 @@ func main() {
 		logger.WithSaveToFile(cfg.Logger.IsSave),
 	)
 
-
 	// init mysql
 	model.InitMysql()
 

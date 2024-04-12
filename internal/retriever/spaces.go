@@ -2,13 +2,16 @@ package retriever
 
 import (
 	"api-service/internal/dbEntity/cache"
+	"api-service/internal/model"
+	"api-service/internal/types"
+	"context"
 
 	"gorm.io/gorm"
 )
 
 type SpacesRetriever interface {
 	//Create (c context.Context, space *model.Space) error
-	//Query (c context.Context) ([]*model.Space, error)
+	Query(ctx context.Context, request types.SpacesQueryRequest, limit int, after int) (*[]model.Space, int, bool, error)
 }
 
 type spacesRetriever struct {
@@ -28,7 +31,37 @@ func (s *spacesRetriever) Create(c interface{}, space *interface{}) error {
 	panic("implement me")
 }
 
-func (s *spacesRetriever) Query(c interface{}) ([]*interface{}, error) {
-	//TODO implement me
-	panic("implement me")
+/*
+filter:筛选条件
+limit: 每一次请求要求的数量
+pageNumber:第几次请求
+*/
+func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRequest, limit int, after int) (*[]model.Space, int, bool, error) {
+	var spaces []model.Space
+	var space model.Space
+	var count int64
+	var HasNextPage bool
+
+	HasNextPage = true
+	deSession := s.db.Session(&gorm.Session{})
+	if request.VerifiedOnly != false {
+		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
+	} else {
+		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?)", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%")
+	}
+	deSession.Count(&count)
+	if int(count)-after-limit <= 0 {
+		limit = int(count) - after
+		HasNextPage = false
+	}
+
+	db := deSession.Offset(after).Limit(limit)
+	// 执行查询并获取结果
+	if err := db.Order(request.SpaceListType).Find(&spaces).Error; err != nil {
+		// 处理错误
+	}
+
+	after = after + limit
+
+	return &spaces, after, HasNextPage, nil
 }

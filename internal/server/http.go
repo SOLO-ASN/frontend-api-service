@@ -3,8 +3,9 @@ package server
 import (
 	"api-service/internal/routers"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 var _ IServer = (*httpServer)(nil)
@@ -38,6 +39,7 @@ func NewHTTPServer(addr string, opts ...HTTPOptionFunc) IServer {
 }
 
 func (h *httpServer) Start() error {
+
 	//TODO implement me
 	if err := h.server.ListenAndServe(); err != nil {
 		return fmt.Errorf("failed to start http server: %w", err)
