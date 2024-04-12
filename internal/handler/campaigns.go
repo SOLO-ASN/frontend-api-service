@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"api-service/internal/dbEntity/cache"
@@ -22,10 +23,8 @@ type campaignsHandler struct {
 }
 
 func NewCampaignsHandler() ICampaignsHandler {
-	return &campaignHandler{
-		retriever: retriever.NewCampaignRetriever(
-			model.GetDb(false),
-			&cache.Cache{}),
+	return &campaignsHandler{
+		retriever: retriever.NewCampaignsRetriever(model.GetDb(false), &cache.Cache{}),
 	}
 }
 
@@ -35,6 +34,7 @@ func (h *campaignsHandler) Create(c *gin.Context) {
 }
 
 func (h *campaignsHandler) Query(c *gin.Context) {
+	fmt.Println("11")
 	form := &types.CampaignsQueryReqest{}
 	err := c.ShouldBindJSON(form)
 	if err != nil {
@@ -46,7 +46,7 @@ func (h *campaignsHandler) Query(c *gin.Context) {
 	}
 	// db handle campaign query
 	res, endCursor, hasNextPage, err := h.retriever.Query(c, *form, form.First, form.After)
-	campaignsresponse := campaignQuery(res, endCursor, hasNextPage)
+	campaignsresponse := campaignsQuery(res, endCursor, hasNextPage)
 
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
@@ -54,7 +54,7 @@ func (h *campaignsHandler) Query(c *gin.Context) {
 		Message: "NOT_LOGIN",
 	}, campaignsresponse)
 }
-func campaignQuery(campaigns *[]model.Campaign, endCursor int, hasNextPage bool) types.CampaignsQueryResponse {
+func campaignsQuery(campaigns *[]model.Campaign, endCursor int, hasNextPage bool) types.CampaignsQueryResponse {
 	return types.CampaignsQueryResponse{
 		PageInfo: struct {
 			EndCursor   int  `json:"endCursor"`

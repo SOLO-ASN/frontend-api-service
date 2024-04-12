@@ -5,7 +5,6 @@ import (
 	"api-service/internal/model"
 	"api-service/internal/types"
 	"context"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -46,20 +45,19 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 	HasNextPage = true
 	deSession := s.db.Session(&gorm.Session{})
 	deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
-	fmt.Println(request.SearchString, request.VerifiedOnly)
 	deSession.Count(&count)
-	fmt.Println(count)
 	if int(count)-after-limit <= 0 {
 		limit = int(count) - after
 		HasNextPage = false
 	}
-	fmt.Println(limit)
+
 	db := deSession.Offset(after).Limit(limit)
 	// 执行查询并获取结果
 	if err := db.Order(request.SpaceListType).Find(&spaces).Error; err != nil {
 		// 处理错误
 	}
-	fmt.Println(spaces)
+
 	after = after + limit
+
 	return &spaces, after, HasNextPage, nil
 }

@@ -5,7 +5,7 @@ import "time"
 type Cred struct {
 	ID                    string         `gorm:"column:id;type:varchar(50);primary_key" json:"id"`
 	Description           string         `gorm:"column:description;type:varchar(255)" json:"description"`
-	Name                  string         `:"column:name;type:varchar(50);NOT NULL" json:"name"`
+	Name                  string         `gorm:"column:name;type:varchar(50);NOT NULL" json:"name"`
 	Type                  string         `gorm:"column:type;type:varchar(50);NOT NULL" json:"type"`
 	CredType              string         `gorm:"column:cred_type;type:varchar(50);NOT NULL" json:"credType"`
 	CredSource            string         `gorm:"column:cred_source;type:varchar(50);NOT NULL" json:"credSource"`

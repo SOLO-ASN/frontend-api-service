@@ -7,9 +7,9 @@ type Space struct {
 	Name                string `gorm:"column:name;type:varchar(50);NOT NULL" json:"name"`
 	Owner               string `gorm:"column:owner;type:varchar(50);NOT NULL" json:"owner"`
 	Thumbnail           string `gorm:"column:thumbnail;type:varchar(255);" json:"thumbnail"`
-	Alias               string `gorm:"column:alias;type:varchar(50);" json:"alias"` //别名是否可以不要
+	Alias               string `gorm:"column:alias;type:varchar(50);" json:"alias"`
 	IsVerified          bool   `gorm:"column:isVerified" json:"isVerified"`
-	Info                string `gorm:"column:info;type:varchar(255);" json:"info"`
+	Info                string `gorm:"column:info;type:varchar(1500);" json:"info"`
 	ActiveCampaignCount int    `gorm:"column:followersCount" json:"activeCampaignCount"`
 	//TgeInfo          []TgeInfo        `json:"tgeInfo"`
 	Links            datatypes.JSON `gorm:"column:links" json:"links"`
@@ -23,6 +23,7 @@ type Space struct {
 	Banner           string           `gorm:"column:banner;type:varchar(255)" json:"banner"`
 	SeoImage         string           `gorm:"column:seoImage;type:varchar(255)" json:"seoImage"`
 	Categories       datatypes.JSON   `gorm:"column:categories" json:"categories"`
+	IsFollowing      bool
 }
 
 func (s *Space) TableName() string {

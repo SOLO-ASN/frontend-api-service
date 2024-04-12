@@ -47,12 +47,12 @@ func (s spacesHandler) Follow(c *gin.Context) {
 	}
 
 	// db handle follow
-
+	responseFollow := "{}"
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
 		Code:    31002,
 		Message: "NOT_LOGIN",
-	})
+	}, responseFollow)
 }
 
 func (s spacesHandler) UnFollow(c *gin.Context) {
