@@ -44,7 +44,11 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 
 	HasNextPage = true
 	deSession := s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
+	if request.VerifiedOnly != false {
+		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
+	} else {
+		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?)", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%")
+	}
 	deSession.Count(&count)
 	if int(count)-after-limit <= 0 {
 		limit = int(count) - after

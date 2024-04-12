@@ -1,6 +1,10 @@
 package middleware
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -12,7 +16,13 @@ func Cors() gin.HandlerFunc {
 			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type")
 			c.Header("Access-Control-Allow-Credentials", "true")
 		}
-
-		c.Next()
+		if c.Request.Method == "OPTIONS" {
+			// Accept preflight request
+			c.AbortWithStatus(http.StatusOK)
+		} else {
+			// Continue with the actual request
+			c.Next()
+		}
+		//c.Next()
 	}
 }
