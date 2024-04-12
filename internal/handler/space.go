@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"api-service/internal/dbEntity/cache"
@@ -39,7 +38,7 @@ func (s spaceHandler) Query(c *gin.Context) {
 	//TODO implement me
 	form := &types.SpaceQueryRequest{}
 	err := c.ShouldBindJSON(form)
-	fmt.Println(form)
+
 	if err != nil {
 		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusBadRequest,

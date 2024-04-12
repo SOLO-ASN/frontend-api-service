@@ -47,5 +47,5 @@ type SpacesQueryResponse struct {
 }
 
 type FollowRequest struct {
-	Id int `json:"id"`
+	Id string `json:"id"`
 }

@@ -41,7 +41,8 @@ func (s spaceRetriever) Create(c context.Context, table *model.Space) error {
 func (s spaceRetriever) Query(c context.Context, alias string) (*model.Space, error) {
 	var space model.Space
 	var token model.Token
-	if err := s.db.First(&space, "alias = ?", alias).Error; err != nil {
+	deSession := s.db.Session(&gorm.Session{})
+	if err := deSession.First(&space, "alias = ?", alias).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 未找到记录
 			return nil, err
@@ -49,15 +50,16 @@ func (s spaceRetriever) Query(c context.Context, alias string) (*model.Space, er
 		// 发生了其他错误
 		return nil, err
 	}
-	fmt.Println(space.TokenID)
-	if err := s.db.First(&token, "id = ?", space.TokenID).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// 未找到记录
-			return nil, err
-		}
-		// 发生了其他错误
-		return nil, err
-	}
+	fmt.Println(space.FollowersCount)
+	deSession.First(&token, "id = ?", space.TokenID)
+	// if err := deSession.First(&token, "id = ?", space.TokenID).Error; err != nil {
+	// 	if errors.Is(err, gorm.ErrRecordNotFound) {
+	// 		// 未找到记录
+	// 		return nil, err
+	// 	}
+	// 	// 发生了其他错误
+	// 	return nil, err
+	// }
 	// res := s.db.First(&space, "alias = ?", alias)
 	// if res.Error != nil {
 

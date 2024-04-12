@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"api-service/internal/dbEntity/cache"
@@ -34,7 +33,7 @@ func (h *campaignsHandler) Create(c *gin.Context) {
 }
 
 func (h *campaignsHandler) Query(c *gin.Context) {
-	fmt.Println("11")
+
 	form := &types.CampaignsQueryReqest{}
 	err := c.ShouldBindJSON(form)
 	if err != nil {
