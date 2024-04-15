@@ -43,6 +43,7 @@ func (h *campaignsHandler) Query(c *gin.Context) {
 		}, err)
 		return
 	}
+
 	// db handle campaign query
 	res, endCursor, hasNextPage, err := h.retriever.Query(c, *form, form.First, form.After)
 	campaignsresponse := campaignsQuery(res, endCursor, hasNextPage)

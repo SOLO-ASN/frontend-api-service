@@ -3,7 +3,7 @@ package types
 type SpaceCreateRequest struct{}
 
 type SpaceQueryRequest struct {
-	Alias string `json:"alias" binding:""`
+	Id string `json:"id" binding:""`
 }
 
 type SpaceQueryResponse struct {

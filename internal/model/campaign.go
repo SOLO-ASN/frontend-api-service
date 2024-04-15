@@ -47,6 +47,7 @@ type Campaign struct {
 	SpaceID               string    `gorm:"column:spaceId;type:varchar(50)" json:"spaceId"`
 	SmartbalanceDeposited bool      `gorm:"column:smartbalanceDeposited" json:"smartbalanceDeposited"`
 	SmartbalancePreCheck  string    `gorm:"column:smartbalancePreCheck;type:varchar(255)" json:"smartbalancePreCheck"`
+	ParticipantsCount     int       `gorm:"column:participantsCount;" json:"participantsCount"`
 }
 
 func (c *Campaign) TableName() string {

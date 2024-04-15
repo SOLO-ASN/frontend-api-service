@@ -3,7 +3,6 @@ package retriever
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/model"
@@ -38,11 +37,11 @@ func (s spaceRetriever) Create(c context.Context, table *model.Space) error {
 /*
 
  */
-func (s spaceRetriever) Query(c context.Context, alias string) (*model.Space, error) {
+func (s spaceRetriever) Query(c context.Context, id string) (*model.Space, error) {
 	var space model.Space
 	var token model.Token
 	deSession := s.db.Session(&gorm.Session{})
-	if err := deSession.First(&space, "alias = ?", alias).Error; err != nil {
+	if err := deSession.First(&space, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 未找到记录
 			return nil, err
@@ -50,7 +49,7 @@ func (s spaceRetriever) Query(c context.Context, alias string) (*model.Space, er
 		// 发生了其他错误
 		return nil, err
 	}
-	fmt.Println(space.FollowersCount)
+
 	deSession.First(&token, "id = ?", space.TokenID)
 	// if err := deSession.First(&token, "id = ?", space.TokenID).Error; err != nil {
 	// 	if errors.Is(err, gorm.ErrRecordNotFound) {

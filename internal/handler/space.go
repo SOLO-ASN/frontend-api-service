@@ -48,7 +48,7 @@ func (s spaceHandler) Query(c *gin.Context) {
 	}
 	// todo retrieve data from db
 
-	res, _ := s.retriever.Query(c, form.Alias)
+	res, _ := s.retriever.Query(c, form.Id)
 
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
