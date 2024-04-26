@@ -23,7 +23,7 @@ type Space struct {
 	Banner           string           `gorm:"column:banner;type:varchar(255)" json:"banner"`
 	SeoImage         string           `gorm:"column:seoImage;type:varchar(255)" json:"seoImage"`
 	Categories       datatypes.JSON   `gorm:"column:categories" json:"categories"`
-	IsFollowing      bool
+	IsFollowing      bool             `json:"isFollowing"`
 }
 
 func (s *Space) TableName() string {

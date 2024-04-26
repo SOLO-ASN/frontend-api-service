@@ -64,24 +64,47 @@ func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.Camp
 			deSession.Or("chain = ?", Chain)
 		}
 	}
+	//注释于2024.04.24
+	// if queryRequest.RewardTypes[0] != "all" {
+	// 	deSession = deSession.Model(campaign).Where("(rewardTypes = ?", queryRequest.RewardTypes[0])
+	// 	for i, RewardType := range queryRequest.RewardTypes {
+	// 		if i == len(queryRequest.RewardTypes)-1 {
+	// 			deSession.Or("rewardTypes = ?)", RewardType)
+	// 			continue
+	// 		}
+	// 		deSession.Or("rewardTypes = ?", RewardType)
+	// 	}
+	// }
 	if queryRequest.RewardTypes[0] != "all" {
-		deSession = deSession.Model(campaign).Where("(rewardTypes = ?", queryRequest.RewardTypes[0])
+		deSession = deSession.Model(campaign).Where("(rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?", queryRequest.RewardTypes[0]+"%", "%"+queryRequest.RewardTypes[0]+"%", "%"+queryRequest.RewardTypes[0])
 		for i, RewardType := range queryRequest.RewardTypes {
 			if i == len(queryRequest.RewardTypes)-1 {
-				deSession.Or("rewardTypes = ?)", RewardType)
+				deSession.Or("rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?)", RewardType+"%", "%"+RewardType+"%", "%"+RewardType)
 				continue
 			}
-			deSession.Or("rewardTypes = ?", RewardType)
+			deSession.Or("rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?", RewardType+"%", "%"+RewardType+"%", "%"+RewardType)
 		}
 	}
+
+	//注释于2024.04.24
+	// if queryRequest.CredSources[0] != "all" {
+	// 	deSession = deSession.Model(campaign).Where("(credSources = ?", queryRequest.CredSources[0])
+	// 	for i, credSource := range queryRequest.CredSources {
+	// 		if i == len(queryRequest.CredSources)-1 {
+	// 			deSession.Or("credSources = ?)", credSource)
+	// 			continue
+	// 		}
+	// 		deSession.Or("credSources = ?", credSource)
+	// 	}
+	// }
 	if queryRequest.CredSources[0] != "all" {
-		deSession = deSession.Model(campaign).Where("(credSources = ?", queryRequest.CredSources[0])
+		deSession = deSession.Model(campaign).Where("(credSources like  ? OR credSources like ? OR credSources like ?", queryRequest.CredSources[0]+"%", "%"+queryRequest.CredSources[0]+"%", "%"+queryRequest.CredSources[0])
 		for i, credSource := range queryRequest.CredSources {
 			if i == len(queryRequest.CredSources)-1 {
-				deSession.Or("credSources = ?)", credSource)
+				deSession.Or("rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?)", credSource+"%", "%"+credSource+"%", "%"+credSource)
 				continue
 			}
-			deSession.Or("credSources = ?", credSource)
+			deSession.Or("rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?", credSource+"%", "%"+credSource+"%", "%"+credSource)
 		}
 	}
 
