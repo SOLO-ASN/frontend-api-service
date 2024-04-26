@@ -1,9 +1,15 @@
 package model
 
 type CampaignParticipant struct {
-	ParticipantsCount       int `gorm:"column:participants_count;NOT NULL" json:"participantsCount"`
-	BountyWinnersCount      int `gorm:"column:bounty_winners_count;NOT NULL" json:"bountyWinnersCount"`
-	Participants_connection participants_connection
+	ID                int    `gorm:"type:string;aouto_increment;primary_key" json:"id"`
+	CampaignId        string `gorm:"column:campaignId;type:varchar(255)" json:"campaignId"`
+	ParticipantId     string `gorm:"column:participantId;type:varchar(255)" json:"participantId"`
+	Status            string `gorm:"column:status;type:varchar(55)" json:"status"`
+	participantsCount int
+
+	// ParticipantsCount       int `gorm:"column:participants_count;NOT NULL" json:"participantsCount"`
+	// BountyWinnersCount      int `gorm:"column:bounty_winners_count;NOT NULL" json:"bountyWinnersCount"`
+	// Participants_connection participants_connection
 }
 type participants_connection struct {
 	addresses []Address

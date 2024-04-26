@@ -47,56 +47,11 @@ func (h *campaignHandler) Query(c *gin.Context) {
 
 	// db handle campaign query
 
-	res := campaignQueryMockData()
+	res, err := h.retriever.Query(c, *form)
 
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
 		Code:    62001,
 		Message: "campaign query success",
 	}, res)
-}
-
-func campaignQueryMockData() []types.CampaignQueryResponse {
-	return []types.CampaignQueryResponse{
-		{
-			Id:                "GCK5JUUjFn",
-			Name:              "Project Galaxy Meme Contest #1 Winner",
-			Type:              "Oat",
-			Status:            "Expired",
-			Thumbnail:         "https://cdn.galxe.com/galaxy/assets/galaxyspace/1653583425186120168.png",
-			ParticipantsCount: 3,
-		},
-		{
-			Id:                "GC4SjtTJ2f",
-			Name:              "Galxe Radio Episode 60 Feat. Laika AI",
-			Type:              "Oat",
-			Status:            "Active",
-			Thumbnail:         "https://cdn.galxe.com/galaxy/galxe/adef1dc4-97e1-4247-b929-502af976edba.png",
-			ParticipantsCount: 993,
-		},
-		{
-			Id:                "GC2D5kRt7L",
-			Name:              "Community Art Contest",
-			Type:              "Art Contest",
-			Status:            "Ended",
-			Thumbnail:         "https://cdn.galxe.com/galaxy/assets/galaxyspace/1653583425186120168.png",
-			ParticipantsCount: 532,
-		},
-		{
-			Id:                "GC4G7fJk8Z",
-			Name:              "Galxe SDK Tutorial Completion",
-			Type:              "Tutorial",
-			Status:            "Active",
-			Thumbnail:         "https://cdn.galxe.com/galaxy/assets/galaxyspace/1653583425186120168.png",
-			ParticipantsCount: 780,
-		},
-		{
-			Id:                "GC5H8iKl0Q",
-			Name:              "Beta Testers for New Platform Features",
-			Type:              "Beta Testing",
-			Status:            "Recruiting",
-			Thumbnail:         "https://cdn.galxe.com/galaxy/assets/galaxyspace/1653583425186120168.png",
-			ParticipantsCount: 320,
-		},
-	}
 }

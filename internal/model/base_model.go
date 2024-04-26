@@ -1,18 +1,16 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 // Model is the base model, like gorm.Model
 type Model struct {
-	ID        string     `gorm:"type:string;primary_key" json:"id"`
-	CreatedAt time.Time  `gorm:"column:created_at" json:"createdAt"`
-	UpdatedAt time.Time  `gorm:"column:updated_at" json:"updatedAt"`
-	DeletedAt *time.Time `gorm:"column:deleted_at" json:"-"`
+	ID        string `gorm:"type:string;primary_key" json:"id"`
+	CreatedAt int    `gorm:"column:created_at" json:"createdAt"`
+	UpdatedAt int    `gorm:"column:updated_at" json:"updatedAt"`
+	DeletedAt int    `gorm:"column:deleted_at" json:"deletedAt"`
 }
 
 type BaseChain struct {
