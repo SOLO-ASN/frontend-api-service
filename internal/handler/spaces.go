@@ -45,7 +45,7 @@ func (s spacesHandler) Follow(c *gin.Context) {
 		}, err)
 		return
 	}
-	if form.Username != "" {
+	if &form.Username != nil {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    31002,
 			Message: "NOT_LOGIN",
@@ -71,7 +71,7 @@ func (s spacesHandler) UnFollow(c *gin.Context) {
 		}, err)
 		return
 	}
-	if form.Username != "" {
+	if &form.Username != nil {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    31002,
 			Message: "NOT_LOGIN",
@@ -106,7 +106,7 @@ func (s spacesHandler) Query(c *gin.Context) {
 	spacesQueryResponse := spacesQueryResponse(res, endCursor, hasNextPage)
 
 	// assume we got all the dataD
-	if form.Username == "" {
+	if &form.Username == nil {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    62001,
 			Message: "NOT_LOGIN",
