@@ -5,7 +5,6 @@ import (
 	"api-service/internal/model"
 	"api-service/internal/types"
 	"context"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -145,7 +144,6 @@ func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowReques
 	res := deSession.First(&user)
 
 	if res.Error != nil {
-		fmt.Println(2)
 		return "false", nil
 	}
 	deSession = s.db.Session(&gorm.Session{})

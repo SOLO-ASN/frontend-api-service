@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"api-service/internal/dbEntity/cache"
@@ -45,7 +46,8 @@ func (s spacesHandler) Follow(c *gin.Context) {
 		}, err)
 		return
 	}
-	if &form.Username != nil {
+	fmt.Println(form.Username)
+	if form.Username == "" {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    31002,
 			Message: "NOT_LOGIN",
@@ -71,7 +73,7 @@ func (s spacesHandler) UnFollow(c *gin.Context) {
 		}, err)
 		return
 	}
-	if &form.Username != nil {
+	if form.Username == "" {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    31002,
 			Message: "NOT_LOGIN",
@@ -106,7 +108,7 @@ func (s spacesHandler) Query(c *gin.Context) {
 	spacesQueryResponse := spacesQueryResponse(res, endCursor, hasNextPage)
 
 	// assume we got all the dataD
-	if &form.Username == nil {
+	if form.Username == "" {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    62001,
 			Message: "NOT_LOGIN",
