@@ -45,7 +45,7 @@ func (h *campaignsHandler) Query(c *gin.Context) {
 	}
 
 	// db handle campaign query
-	res, endCursor, hasNextPage, err := h.retriever.Query(c, *form, form.First, form.After)
+	res, endCursor, hasNextPage, err := h.retriever.Query(c, form, form.First, form.After)
 	campaignsresponse := campaignsQuery(res, endCursor, hasNextPage)
 
 	// assume we got all the data

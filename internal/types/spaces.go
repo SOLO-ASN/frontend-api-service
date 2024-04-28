@@ -3,12 +3,13 @@ package types
 import "api-service/internal/model"
 
 type SpacesQueryRequest struct {
-	First         int      `json:"first"`
-	After         int      `json:"after"`
-	Filters       []string `json:"filters"`
-	SearchString  string   `json:"searchString"`
-	SpaceListType string   `json:"spaceListType"`
-	VerifiedOnly  bool     `json:"verifiedOnly"`
+	First         int    `json:"first"`
+	After         int    `json:"after"`
+	Filter        string `json:"filter"`
+	Username      string `json:"username"`
+	SearchString  string `json:"searchString"`
+	SpaceListType string `json:"spaceListType"`
+	VerifiedOnly  bool   `json:"verifiedOnly"`
 }
 
 // Filters []struct {
@@ -47,5 +48,7 @@ type SpacesQueryResponse struct {
 }
 
 type FollowRequest struct {
-	Id string `json:"id"`
+	//Id string `json:"id"`
+	SpaceId  string `json:"spaceid"`
+	Username string `json:"username"`
 }

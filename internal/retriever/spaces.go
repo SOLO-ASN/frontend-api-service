@@ -5,6 +5,7 @@ import (
 	"api-service/internal/model"
 	"api-service/internal/types"
 	"context"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -12,6 +13,8 @@ import (
 type SpacesRetriever interface {
 	//Create (c context.Context, space *model.Space) error
 	Query(ctx context.Context, request types.SpacesQueryRequest, limit int, after int) (*[]model.Space, int, bool, error)
+	Follow(ctx context.Context, request types.FollowRequest) (string, error)
+	UnFollow(ctx context.Context, request types.FollowRequest) (string, error)
 }
 
 type spacesRetriever struct {
@@ -41,8 +44,61 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 	var space model.Space
 	var count int64
 	var HasNextPage bool
-
+	var SpaceFollower model.SpaceFollower
+	var SpaceFollowers []model.SpaceFollower
+	var user model.Jpa_web_authn_user
 	HasNextPage = true
+	if request.Filter == "follow" {
+		if &request.Username == nil {
+			return &spaces, after, HasNextPage, nil
+		}
+
+		deSession := s.db.Session(&gorm.Session{})
+		deSession = deSession.Model(user).Where("username = ?", request.Username)
+		deSession.First(&user)
+		deSession = s.db.Session(&gorm.Session{})
+		deSession = deSession.Model(SpaceFollower).Where("participantId = ? ", user.Id)
+		res := deSession.Find(&SpaceFollowers)
+		if res.Error != nil {
+			return &spaces, after, HasNextPage, nil
+		}
+		var spaceids []string
+		for _, spacefollower := range SpaceFollowers {
+			if spacefollower.IsFollowing == true {
+				spaceids = append(spaceids, spacefollower.SpaceId)
+			}
+		}
+		deSession = s.db.Session(&gorm.Session{})
+		deSession = deSession.Model(spaces).Where("(id = ?", spaceids[0])
+		for i, spaceId := range spaceids {
+			if i == len(spaceids)-1 {
+				deSession.Or("id = ?)", spaceId)
+				continue
+			}
+			deSession.Or("id = ?", spaceId)
+		}
+		if request.VerifiedOnly != false {
+			deSession = deSession.Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
+		} else {
+			deSession = deSession.Where("(name like ? OR name like ? OR name like ?)", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%")
+		}
+		deSession.Count(&count)
+		if int(count)-after-limit <= 0 {
+			limit = int(count) - after
+			HasNextPage = false
+		}
+
+		db := deSession.Offset(after).Limit(limit)
+		if err := db.Order(request.SpaceListType + " desc").Find(&spaces).Error; err != nil {
+			// 处理错误
+		}
+		after = after + limit
+		for i, _ := range spaces {
+			spaces[i].IsFollowing = true
+		}
+		return &spaces, after, HasNextPage, nil
+	}
+
 	deSession := s.db.Session(&gorm.Session{})
 	if request.VerifiedOnly != false {
 		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
@@ -57,11 +113,82 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 
 	db := deSession.Offset(after).Limit(limit)
 	// 执行查询并获取结果
-	if err := db.Order(request.SpaceListType).Find(&spaces).Error; err != nil {
+	if err := db.Order(request.SpaceListType + " desc").Find(&spaces).Error; err != nil {
 		// 处理错误
 	}
 
 	after = after + limit
 
+	if &request.Username != nil {
+		deSession = s.db.Session(&gorm.Session{})
+		deSession = deSession.Model(user).Where("username = ?", request.Username)
+		deSession.First(&user)
+		for i, space := range spaces {
+			deSession = s.db.Session(&gorm.Session{})
+			deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, space.ID)
+			res := deSession.First(&SpaceFollower)
+			if res.Error != nil {
+				spaces[i].IsFollowing = false
+				continue
+			}
+			spaces[i].IsFollowing = SpaceFollower.IsFollowing
+		}
+	}
 	return &spaces, after, HasNextPage, nil
+}
+func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowRequest) (string, error) {
+	var SpaceFollower model.SpaceFollower
+	var user model.Jpa_web_authn_user
+	success := "Follow Success"
+	deSession := s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	res := deSession.First(&user)
+
+	if res.Error != nil {
+		fmt.Println(2)
+		return "false", nil
+	}
+	deSession = s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.SpaceId)
+
+	res1 := deSession.First(&SpaceFollower)
+
+	if res1.Error != nil {
+		Follower := model.SpaceFollower{SpaceId: request.SpaceId, ParticipantId: user.Id, IsFollowing: true}
+		deSession = s.db.Session(&gorm.Session{})
+		result := deSession.Create(&Follower) // 通过数据的指针来创建
+		if result.Error != nil {
+
+			return "false", nil
+		}
+		return success, nil
+	}
+	SpaceFollower.IsFollowing = true
+	deSession.Save(&SpaceFollower)
+
+	return success, nil
+}
+func (s *spacesRetriever) UnFollow(ctx context.Context, request types.FollowRequest) (string, error) {
+	var SpaceFollower model.SpaceFollower
+	var user model.Jpa_web_authn_user
+	deSession := s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	res := deSession.First(&user)
+	if res.Error != nil {
+		return "false", nil
+	}
+	deSession = s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.SpaceId)
+	res = deSession.First(&SpaceFollower)
+	if res.Error != nil {
+		Follower := model.SpaceFollower{SpaceId: request.SpaceId, ParticipantId: user.Id, IsFollowing: false}
+		result := deSession.Create(&Follower) // 通过数据的指针来创建
+		if result.Error != nil {
+			return "false", nil
+		}
+	}
+	SpaceFollower.IsFollowing = false
+	deSession.Save(&SpaceFollower)
+	success := "UnFollow Success"
+	return success, nil
 }

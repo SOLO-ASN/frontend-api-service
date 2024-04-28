@@ -45,14 +45,20 @@ func (s spacesHandler) Follow(c *gin.Context) {
 		}, err)
 		return
 	}
-
+	if form.Username != "" {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    31002,
+			Message: "NOT_LOGIN",
+		})
+		return
+	}
 	// db handle follow
-	responseFollow := "{}"
+	responseFollow, _ := s.retriever.Follow(c, *form)
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
 		Code:    31002,
-		Message: "NOT_LOGIN",
-	}, responseFollow)
+		Message: responseFollow,
+	})
 }
 
 func (s spacesHandler) UnFollow(c *gin.Context) {
@@ -65,13 +71,21 @@ func (s spacesHandler) UnFollow(c *gin.Context) {
 		}, err)
 		return
 	}
-
+	if form.Username != "" {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    31002,
+			Message: "NOT_LOGIN",
+		})
+		return
+	}
+	// db handle follow
+	responseUnFollow, _ := s.retriever.UnFollow(c, *form)
 	// db handle unfollow
 
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
 		Code:    62001,
-		Message: "unfollow success",
+		Message: responseUnFollow,
 	})
 }
 
@@ -88,12 +102,22 @@ func (s spacesHandler) Query(c *gin.Context) {
 
 	// todo retrieve data from db
 	res, endCursor, hasNextPage, err := s.retriever.Query(c, *form, form.First, form.After)
+
 	spacesQueryResponse := spacesQueryResponse(res, endCursor, hasNextPage)
+
 	// assume we got all the dataD
-	response.OutPut(c, response.WithCodeMessage{
-		Code:    62001,
-		Message: "NOT_LOGIN",
-	}, spacesQueryResponse)
+	if form.Username == "" {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "NOT_LOGIN",
+		}, spacesQueryResponse)
+	} else {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "LOGIN",
+		}, spacesQueryResponse)
+	}
+
 }
 func spacesQueryResponse(spaces *[]model.Space, endCursor int, hasNextPage bool) *types.SpacesQueryResponse {
 	return &types.SpacesQueryResponse{

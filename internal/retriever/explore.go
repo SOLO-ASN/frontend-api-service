@@ -47,6 +47,8 @@ func (exp *exploreRetriever) Query(c context.Context, queryRequest types.Explore
 	HasNextPage = true
 
 	deSession := exp.db.Session(&gorm.Session{})
+	deSession = deSession.Model(campaign)
+
 	if queryRequest.Statuses[0] != "all" {
 		deSession = deSession.Model(campaign).Where("(status = ?", queryRequest.Statuses[0])
 		for i, status := range queryRequest.Statuses {
@@ -87,16 +89,17 @@ func (exp *exploreRetriever) Query(c context.Context, queryRequest types.Explore
 			deSession.Or("credSources = ?", credSource)
 		}
 	}
-
-	deSession = deSession.Model(campaign).Where("(name like ? OR name like ? OR name like ?)", queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
+	if queryRequest.SearchString != "" {
+		deSession = deSession.Where("(name like ? OR name like ? OR name like ?)", queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
+	}
 
 	//deSession.Model(campaign).Where("alias = ? AND status = ? AND chain =? AND gasType AND rewardTypes = ? AND credSources = ?  AND (name like ? OR name like ? OR name like ?)", queryRequest.Alias, queryRequest.Statuses, queryRequest.Chains, queryRequest.RewardTypes, queryRequest.CredSources, queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
 
 	// Find the intersection of ids from CredSources, RewardTypes, and Chains
-
-	deSession = deSession.Order(queryRequest.ListType)
+	if queryRequest.ListType != "" {
+		deSession = deSession.Order(queryRequest.ListType + " desc")
+	}
 	deSession.Count(&count)
-
 	if int(count)-after-limit < 0 {
 		limit = int(count) - after
 		HasNextPage = false
@@ -105,6 +108,7 @@ func (exp *exploreRetriever) Query(c context.Context, queryRequest types.Explore
 	if err := db.Find(&Campaigns).Error; err != nil {
 		// 处理错误
 	}
+
 	after = after + limit
 	// // 使用 map 来存储别名，自动去除重复
 	// aliasMap := make(map[string]struct{})
