@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"api-service/internal/dbEntity/cache"
@@ -46,7 +45,7 @@ func (s spacesHandler) Follow(c *gin.Context) {
 		}, err)
 		return
 	}
-	fmt.Println(form.Username)
+
 	if form.Username == "" {
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    31002,
@@ -101,19 +100,36 @@ func (s spacesHandler) Query(c *gin.Context) {
 		}, err)
 		return
 	}
-
-	// todo retrieve data from db
-	res, endCursor, hasNextPage, err := s.retriever.Query(c, *form, form.First, form.After)
-
-	spacesQueryResponse := spacesQueryResponse(res, endCursor, hasNextPage)
-
 	// assume we got all the dataD
-	if form.Username == "" {
+	if form.Username == "" && form.Filter == "follow" {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "NOT_LOGIN",
+		})
+	} else if form.Username == "" {
+		res, endCursor, hasNextPage, err := s.retriever.Query(c, *form, form.First, form.After)
+		if err != nil {
+			response.Error(c, response.WithCodeMessage{
+				Code:    http.StatusBadRequest,
+				Message: "invalid request parameters",
+			}, err)
+			return
+		}
+		spacesQueryResponse := spacesQueryResponse(res, endCursor, hasNextPage)
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    62001,
 			Message: "NOT_LOGIN",
 		}, spacesQueryResponse)
 	} else {
+		res, endCursor, hasNextPage, err := s.retriever.Query(c, *form, form.First, form.After)
+		if err != nil {
+			response.Error(c, response.WithCodeMessage{
+				Code:    http.StatusBadRequest,
+				Message: "invalid request parameters",
+			}, err)
+			return
+		}
+		spacesQueryResponse := spacesQueryResponse(res, endCursor, hasNextPage)
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    62001,
 			Message: "LOGIN",

@@ -99,10 +99,20 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 	}
 
 	deSession := s.db.Session(&gorm.Session{})
-	if request.VerifiedOnly != false {
-		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
+	deSession = deSession.Model(space)
+	if request.SearchString != "" {
+
+		if request.VerifiedOnly != false {
+			deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?) AND isVerified = ?", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%", request.VerifiedOnly)
+		} else {
+			deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?)", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%")
+		}
 	} else {
-		deSession = deSession.Model(space).Where("(name like ? OR name like ? OR name like ?)", request.SearchString+"%", "%"+request.SearchString, "%"+request.SearchString+"%")
+		if request.VerifiedOnly != false {
+			deSession = deSession.Model(space).Where(" isVerified = ?", request.VerifiedOnly)
+		} else {
+
+		}
 	}
 	deSession.Count(&count)
 	if int(count)-after-limit <= 0 {
@@ -118,19 +128,23 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 
 	after = after + limit
 
-	if &request.Username != nil {
+	if request.Username != "" {
 		deSession = s.db.Session(&gorm.Session{})
 		deSession = deSession.Model(user).Where("username = ?", request.Username)
 		deSession.First(&user)
+
 		for i, space := range spaces {
-			deSession = s.db.Session(&gorm.Session{})
-			deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, space.ID)
-			res := deSession.First(&SpaceFollower)
+			var SpaceFollower1 model.SpaceFollower
+			deSession1 := s.db.Session(&gorm.Session{})
+			deSession1 = deSession1.Model(SpaceFollower1).Where("participantId = ? AND spaceId = ? ", user.Id, space.ID)
+			res := deSession1.First(&SpaceFollower1)
 			if res.Error != nil {
 				spaces[i].IsFollowing = false
 				continue
 			}
-			spaces[i].IsFollowing = SpaceFollower.IsFollowing
+
+			//fmt.Println(SpaceFollower)
+			spaces[i].IsFollowing = SpaceFollower1.IsFollowing
 		}
 	}
 	return &spaces, after, HasNextPage, nil
@@ -138,6 +152,7 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowRequest) (string, error) {
 	var SpaceFollower model.SpaceFollower
 	var user model.Jpa_web_authn_user
+	var space model.Space
 	success := "Follow Success"
 	deSession := s.db.Session(&gorm.Session{})
 	deSession = deSession.Model(user).Where("username = ?", request.Username)
@@ -159,6 +174,12 @@ func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowReques
 
 			return "false", nil
 		}
+		deSession = s.db.Session(&gorm.Session{})
+		deSession = deSession.Model(space).Where("id=?", request.SpaceId)
+		deSession = deSession.First(&space)
+
+		space.Followers += 1
+		deSession.Save(&space)
 		return success, nil
 	}
 	SpaceFollower.IsFollowing = true
@@ -169,6 +190,7 @@ func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowReques
 func (s *spacesRetriever) UnFollow(ctx context.Context, request types.FollowRequest) (string, error) {
 	var SpaceFollower model.SpaceFollower
 	var user model.Jpa_web_authn_user
+	var space model.Space
 	deSession := s.db.Session(&gorm.Session{})
 	deSession = deSession.Model(user).Where("username = ?", request.Username)
 	res := deSession.First(&user)
@@ -187,6 +209,12 @@ func (s *spacesRetriever) UnFollow(ctx context.Context, request types.FollowRequ
 	}
 	SpaceFollower.IsFollowing = false
 	deSession.Save(&SpaceFollower)
+	deSession = s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(space).Where("id=?", request.SpaceId)
+	deSession = deSession.First(&space)
+
+	space.Followers -= 1
+	deSession.Save(&space)
 	success := "UnFollow Success"
 	return success, nil
 }

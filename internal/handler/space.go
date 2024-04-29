@@ -30,8 +30,38 @@ func NewSpaceHandler() ISpaceHandler {
 }
 
 func (s spaceHandler) Create(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	form := &types.SpaceCreateRequest{}
+	err := c.ShouldBindJSON(form)
+
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+	res, _ := s.retriever.Create(c, form)
+	if form.Username == "" {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "NOT_LOGIN",
+		})
+		return
+	} else {
+		// assume we got all the data
+		if res == "success" {
+			response.OutPut(c, response.WithCodeMessage{
+				Code:    62001,
+				Message: "LOGIN",
+			}, "SUCCESSED")
+		} else {
+			response.OutPut(c, response.WithCodeMessage{
+				Code:    62001,
+				Message: "LOGIN",
+			}, "FAILED")
+		}
+	}
+
 }
 
 func (s spaceHandler) Query(c *gin.Context) {
@@ -46,14 +76,21 @@ func (s spaceHandler) Query(c *gin.Context) {
 		}, err)
 		return
 	}
-	// todo retrieve data from db
-
 	res, _ := s.retriever.Query(c, *form)
+	if form.Username == "" {
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "NOT_LOGIN",
+		}, res)
+		return
+	} else {
+		// assume we got all the data
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "LOGIN",
+		}, res)
+	}
 
-	// assume we got all the data
-	response.OutPut(c, response.WithCodeMessage{
-		Code: 62001,
-	}, res)
 }
 
 func spaceQueryResponseMockData() *types.SpaceQueryResponse {

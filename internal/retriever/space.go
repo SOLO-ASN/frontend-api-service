@@ -13,7 +13,7 @@ import (
 )
 
 type SpaceRetriever interface {
-	Create(c context.Context, table *model.Space) error
+	Create(c context.Context, request *types.SpaceCreateRequest) (string, error)
 	Query(c context.Context, request types.SpaceQueryRequest) (*model.Space, error)
 }
 
@@ -29,10 +29,26 @@ func NewSpaceRetriever(db *gorm.DB, cache *cache.Cache) SpaceRetriever {
 	}
 }
 
-func (s spaceRetriever) Create(c context.Context, table *model.Space) error {
+func (s spaceRetriever) Create(c context.Context, request *types.SpaceCreateRequest) (string, error) {
+	var space model.Space
+	var user model.Jpa_web_authn_user
+	space.Name = request.Name
+	space.Alias = request.Alias
+	space.Categories = request.Categories
+	space.Links = request.Links
+	space.Info = request.Info
+	space.Thumbnail = request.Thumbnail
+	deSession := s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	deSession.First(&user)
+	space.Owner = string(user.Id)
+	deSession = s.db.Session(&gorm.Session{})
+	result := deSession.Create(&space) // 通过数据的指针来创建
+	if result.Error != nil {
 
-	err := s.db.WithContext(c).Create(table).Error
-	return err
+		return "false", nil
+	}
+	return "success", nil
 
 }
 
@@ -72,15 +88,13 @@ func (s spaceRetriever) Query(c context.Context, request types.SpaceQueryRequest
 	// }
 
 	space.Token = token
-	if request.Username != "null" {
-		deSession = s.db.Session(&gorm.Session{})
-		deSession = deSession.Model(user).Where("username = ?", request.Username)
-		deSession.First(&user)
-		deSession = s.db.Session(&gorm.Session{})
-		deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.Id)
-		deSession.First(&SpaceFollower)
-		fmt.Println(SpaceFollower)
-		space.IsFollowing = SpaceFollower.IsFollowing
-	}
+	deSession = s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	deSession.First(&user)
+	deSession = s.db.Session(&gorm.Session{})
+	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.Id)
+	deSession.First(&SpaceFollower)
+	space.IsFollowing = SpaceFollower.IsFollowing
+	fmt.Println(space)
 	return &space, nil
 }

@@ -28,6 +28,9 @@ var (
 
 	group_Campaigns      []func(rg *gin.RouterGroup)
 	group_Campaigns_Path = "/campaigns"
+
+	group_Images      []func(rg *gin.RouterGroup)
+	group_Images_Path = "/images"
 )
 
 func NewRouter() *gin.Engine {

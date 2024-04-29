@@ -17,13 +17,13 @@ type Space struct {
 	Backers          datatypes.JSON `gorm:"column:backers" json:"backers"`
 	TokenID          string         `gorm:"column:tokenid;type:varchar(50);" json:"tokenid"` //用于索引token.;创建space时要注意
 	Token            Token
-	DiscordGuildID   string           `gorm:"column:discordGuildID;type:varchar(50)" json:"discordGuildID"`
-	DiscordGuildInfo DiscordGuildInfo `gorm:"embedded;embeddedPrefix:discordGuildInfo" json:"discordGuildInfo"`
-	Banner           string           `gorm:"column:banner;type:varchar(255)" json:"banner"`
-	SeoImage         string           `gorm:"column:seoImage;type:varchar(255)" json:"seoImage"`
-	Categories       datatypes.JSON   `gorm:"column:categories" json:"categories"`
-	IsFollowing      bool             `json:"isFollowing"`
-	Followers        int              `gorm:"column:followers" json:"followers"`
+	DiscordGuildID   string         `gorm:"column:discordGuildID;type:varchar(50)" json:"discordGuildID"`
+	Discordguildinfo datatypes.JSON `gorm:"colum:discordguildinfo" json:"discordguildinfo"`
+	Banner           string         `gorm:"column:banner;type:varchar(255)" json:"banner"`
+	SeoImage         string         `gorm:"column:seoImage;type:varchar(255)" json:"seoImage"`
+	Categories       datatypes.JSON `gorm:"column:categories" json:"categories"`
+	IsFollowing      bool           `json:"isFollowing" gorm:"-"`
+	Followers        int            `gorm:"column:followers" json:"followers"`
 }
 
 func (s *Space) TableName() string {
