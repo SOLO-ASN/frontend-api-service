@@ -31,5 +31,5 @@ func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	// get user
 	rg.POST("/info", h.GetById)
 	// check twitter account
-	rg.POST("/twitterAccount", h.CheckTwitterAccount)
+	rg.POST("/checkTwitterAccount", h.CheckTwitterAccount)
 }
