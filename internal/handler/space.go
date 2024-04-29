@@ -48,12 +48,11 @@ func (s spaceHandler) Query(c *gin.Context) {
 	}
 	// todo retrieve data from db
 
-	res, _ := s.retriever.Query(c, form.Id)
+	res, _ := s.retriever.Query(c, *form)
 
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
-		Code:    62001,
-		Message: "NOT_LOGIN",
+		Code: 62001,
 	}, res)
 }
 

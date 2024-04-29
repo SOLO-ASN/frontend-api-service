@@ -11,7 +11,7 @@ import (
 
 type CampaignsRetriever interface {
 	//Create (c context.Context, space *model.Campaign) error
-	Query(c context.Context, queryRequest types.CampaignsQueryReqest, limit int, after int) (*[]model.Campaign, int, bool, error)
+	Query(c context.Context, queryRequest *types.CampaignsQueryReqest, limit int, after int) (*[]model.Campaign, int, bool, error)
 }
 
 type campaignsRetriever struct {
@@ -32,7 +32,7 @@ func (cams *campaignsRetriever) Create(c context.Context, tables *[]model.Campai
 
 }
 
-func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.CampaignsQueryReqest, limit int, after int) (*[]model.Campaign, int, bool, error) {
+func (cams *campaignsRetriever) Query(c context.Context, queryRequest *types.CampaignsQueryReqest, limit int, after int) (*[]model.Campaign, int, bool, error) {
 	var campaigns []model.Campaign
 	var campaign model.Campaign
 	var count int64
@@ -44,6 +44,8 @@ func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.Camp
 	HasNextPage = true
 
 	deSession := cams.db.Session(&gorm.Session{})
+	deSession = deSession.Model(campaign)
+
 	if queryRequest.Statuses[0] != "all" {
 		deSession = deSession.Model(campaign).Where("(status = ?", queryRequest.Statuses[0])
 		for i, status := range queryRequest.Statuses {
@@ -64,17 +66,7 @@ func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.Camp
 			deSession.Or("chain = ?", Chain)
 		}
 	}
-	//注释于2024.04.24
-	// if queryRequest.RewardTypes[0] != "all" {
-	// 	deSession = deSession.Model(campaign).Where("(rewardTypes = ?", queryRequest.RewardTypes[0])
-	// 	for i, RewardType := range queryRequest.RewardTypes {
-	// 		if i == len(queryRequest.RewardTypes)-1 {
-	// 			deSession.Or("rewardTypes = ?)", RewardType)
-	// 			continue
-	// 		}
-	// 		deSession.Or("rewardTypes = ?", RewardType)
-	// 	}
-	// }
+
 	if queryRequest.RewardTypes[0] != "all" {
 		deSession = deSession.Model(campaign).Where("(rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?", queryRequest.RewardTypes[0]+"%", "%"+queryRequest.RewardTypes[0]+"%", "%"+queryRequest.RewardTypes[0])
 		for i, RewardType := range queryRequest.RewardTypes {
@@ -86,17 +78,6 @@ func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.Camp
 		}
 	}
 
-	//注释于2024.04.24
-	// if queryRequest.CredSources[0] != "all" {
-	// 	deSession = deSession.Model(campaign).Where("(credSources = ?", queryRequest.CredSources[0])
-	// 	for i, credSource := range queryRequest.CredSources {
-	// 		if i == len(queryRequest.CredSources)-1 {
-	// 			deSession.Or("credSources = ?)", credSource)
-	// 			continue
-	// 		}
-	// 		deSession.Or("credSources = ?", credSource)
-	// 	}
-	// }
 	if queryRequest.CredSources[0] != "all" {
 		deSession = deSession.Model(campaign).Where("(credSources like  ? OR credSources like ? OR credSources like ?", queryRequest.CredSources[0]+"%", "%"+queryRequest.CredSources[0]+"%", "%"+queryRequest.CredSources[0])
 		for i, credSource := range queryRequest.CredSources {
@@ -106,15 +87,24 @@ func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.Camp
 			}
 			deSession.Or("rewardTypes like  ? OR rewardTypes like ? OR rewardTypes like ?", credSource+"%", "%"+credSource+"%", "%"+credSource)
 		}
+
 	}
 
-	deSession = deSession.Model(campaign).Where("(spaceId = ?) AND (name like ? OR name like ? OR name like ?)", queryRequest.SpaceId, queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
+	if queryRequest.SearchString != "" {
+		if queryRequest.SpaceId != "" {
 
-	//deSession.Model(campaign).Where("alias = ? AND status = ? AND chain =? AND gasType AND rewardTypes = ? AND credSources = ?  AND (name like ? OR name like ? OR name like ?)", queryRequest.Alias, queryRequest.Statuses, queryRequest.Chains, queryRequest.RewardTypes, queryRequest.CredSources, queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
+			deSession = deSession.Where("(spaceId = ?) AND (name like ? OR name like ? OR name like ?)", queryRequest.SpaceId, queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
+		} else {
+			deSession = deSession.Where("(name like ? OR name like ? OR name like ?)", queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
+		}
+	} else {
+		if queryRequest.SpaceId != "" {
+			deSession = deSession.Where("(spaceId = ?)", queryRequest.SpaceId)
+		} else {
 
-	// Find the intersection of ids from CredSources, RewardTypes, and Chains
-
-	deSession = deSession.Order(queryRequest.ListType)
+		}
+	}
+	//deSession = deSession.Where("(spaceId = ?) AND (name like ? OR name like ? OR name like ?)", queryRequest.SpaceId, queryRequest.SearchString+"%", "%"+queryRequest.SearchString, "%"+queryRequest.SearchString+"%")
 	deSession.Count(&count)
 
 	if int(count)-after-limit < 0 {
@@ -122,8 +112,14 @@ func (cams *campaignsRetriever) Query(c context.Context, queryRequest types.Camp
 		HasNextPage = false
 	}
 	db := deSession.Offset(after).Limit(limit)
-	if err := db.Find(&campaigns).Error; err != nil {
-		// 处理错误
+	if queryRequest.ListType != "" {
+		if err := db.Order(queryRequest.ListType + " desc").Find(&campaigns).Error; err != nil {
+			// 处理错误
+		}
+	} else {
+		if err := db.Find(&campaigns).Error; err != nil {
+			// 处理错误
+		}
 	}
 
 	after = after + limit
