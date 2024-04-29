@@ -23,6 +23,7 @@ type IUserHandler interface {
 	UpdateEmailById(c *gin.Context)
 	UpdateAddressById(c *gin.Context)
 	DeleteById(c *gin.Context)
+	CheckTwitterAccount(c *gin.Context)
 }
 
 func NewUserHandler() IUserHandler {
@@ -184,4 +185,18 @@ func (u *userHandler) GetById(c *gin.Context) {
 func (u *userHandler) DeleteById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (u *userHandler) CheckTwitterAccount(c *gin.Context) {
+	// use mock data
+	response.OutPut(c, response.WithCodeMessage{
+		Code:    62001,
+		Message: "LOGIN",
+	}, &types.CheckTwitterAccountResponse{
+		CheckTwitterAccount: &types.TwitterAccount{
+			TwitterUserID:   "897858341040410624",
+			TwitterUserName: "XUserName",
+		},
+		Verified: true,
+	})
 }

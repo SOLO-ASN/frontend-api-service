@@ -34,3 +34,13 @@ type UpdateEmailRequest struct {
 	Email            string `json:"email" binding:""`
 	VerificationCode string `json:"verificationCode" binding:""`
 }
+
+type CheckTwitterAccountResponse struct {
+	CheckTwitterAccount *TwitterAccount `json:"checkTwitterAccount"`
+	Verified            bool            `json:"verified"`
+}
+
+type TwitterAccount struct {
+	TwitterUserID   string `json:"twitterUserId" binding:""`
+	TwitterUserName string `json:"twitterUserName" binding:""`
+}
