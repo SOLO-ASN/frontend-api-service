@@ -3,7 +3,6 @@ package retriever
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/model"
@@ -95,6 +94,6 @@ func (s spaceRetriever) Query(c context.Context, request types.SpaceQueryRequest
 	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.Id)
 	deSession.First(&SpaceFollower)
 	space.IsFollowing = SpaceFollower.IsFollowing
-	fmt.Println(space)
+
 	return &space, nil
 }

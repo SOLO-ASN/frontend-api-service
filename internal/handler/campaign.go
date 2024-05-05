@@ -30,8 +30,19 @@ func NewCampaignHandler() ICampaignHandler {
 }
 
 func (h *campaignHandler) Create(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	form := &types.CampaignCreateReqest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+	err, res := h.retriever.Create(c, *form)
+	response.OutPut(c, response.WithCodeMessage{
+		Code: 62001,
+	}, res)
 }
 
 func (h *campaignHandler) Query(c *gin.Context) {

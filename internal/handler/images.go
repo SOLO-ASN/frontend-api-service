@@ -38,6 +38,7 @@ func (s imagesHandler) Upload(c *gin.Context) {
 	//TODO implement me
 	form := &types.ImageUploadRequest{}
 	err := c.ShouldBindJSON(form)
+
 	uploadPath := "/home/node/picture"
 	if err != nil {
 		response.Error(c, response.WithCodeMessage{
@@ -46,6 +47,7 @@ func (s imagesHandler) Upload(c *gin.Context) {
 		}, err)
 		return
 	}
+
 	res, _ := s.retriever.Upload(c, *form, uploadPath)
 
 	// assume we got all the data

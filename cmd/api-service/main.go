@@ -4,7 +4,6 @@ import (
 	"api-service/config"
 	"api-service/internal/middleware/logger"
 	"api-service/internal/model"
-	"api-service/internal/retriever"
 	"api-service/internal/server"
 	"flag"
 	"os"
@@ -15,7 +14,7 @@ import (
 const defaultHTTPAddr = "127.0.0.1:18080"
 
 func main() {
-	retriever.Twitter1()
+	//retriever.Twitter1()
 	config.Init(getConfigPath())
 	cfg := config.Get()
 
