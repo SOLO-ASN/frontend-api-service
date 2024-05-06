@@ -1,9 +1,21 @@
 package types
 
-type SpaceCreateRequest struct{}
+import "gorm.io/datatypes"
+
+type SpaceCreateRequest struct {
+	Username string `json:"username"`
+	Name     string `json:"name"`
+
+	Thumbnail string         `json:"thumbnail"`
+	Links     datatypes.JSON `json:"links"`
+	Alias     string         `json:"alias"`
+
+	Categories datatypes.JSON `json:"categories"`
+	Info       string         `json:"Info"`
+}
 
 type SpaceQueryRequest struct {
-	Id       string `json:"id" binding:""`
+	Id       string `json:"id"`
 	Username string `json:"username"`
 }
 

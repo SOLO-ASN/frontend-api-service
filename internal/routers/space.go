@@ -2,6 +2,7 @@ package routers
 
 import (
 	"api-service/internal/handler"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +17,7 @@ func spaceGroup(rg *gin.RouterGroup, h handler.ISpaceHandler) {
 	rg.Use(func(c *gin.Context) {})
 
 	//
-	rg.POST("/", h.Create)
+	rg.POST("/create", h.Create)
 
 	rg.POST("/query", h.Query)
 

@@ -21,14 +21,14 @@ type Campaign struct {
 	// Nft                   bool                `gorm:"column:nft" json:"nft"`
 	// Ethereum              bool                `gorm:"column:ethereum" json:"ethereum"`
 	// Polygon               bool                `gorm:"column:polygon" json:"polygon"`
-	CredSources              string         `gorm:"column:credSources;varchar(50)" json:"credSources"`
-	IsBookmarked             bool           `gorm:"column:isBookmarked" json:"isBookmarked"`
-	NumberID                 int            `gorm:"column:numberId" json:"numberID"`
-	Info                     string         `gorm:"column:info;varchar(1500)" json:"info"`
-	UseCred                  bool           `gorm:"column:useCred" json:"useCred"`
-	Formula                  string         `gorm:"column:formula" json:"formula"`
-	GasType                  string         `gorm:"column:gasType;type:varchar(255)" json:"gasType"`
-	CreatedAt                string         `gorm:"column:createdAt" json:"createdAt"`
+	CredSources  string `gorm:"column:credSources;varchar(50)" json:"credSources"`
+	IsBookmarked bool   `gorm:"column:isBookmarked" json:"isBookmarked"`
+	NumberID     int    `gorm:"column:numberId" json:"numberID"`
+	Info         string `gorm:"column:info;varchar(1500)" json:"info"`
+	UseCred      bool   `gorm:"column:useCred" json:"useCred"`
+	Formula      string `gorm:"column:formula" json:"formula"`
+	GasType      string `gorm:"column:gasType;type:varchar(255)" json:"gasType"`
+
 	RequirementInfo          string         `gorm:"column:requirementInfo" json:"requirementInfo"`
 	Description              string         `gorm:"column:description" json:"description"`
 	Chain                    string         `gorm:"column:chain;type:varchar(255)" json:"chain"`
@@ -40,7 +40,7 @@ type Campaign struct {
 	EndTime                  int            `gorm:"column:endtime" json:"endTime"`
 	Cap                      int            `gorm:"column:cap" json:"cap"`
 	LoyaltyPoints            int            `gorm:"column:loyaltyPoints" json:"loyaltyPoints"`
-	TokenRewardContract      string         `gorm:"column:tokenRewardContract;type:varchar(50); json:"tokenRewardContract"`
+	TokenRewardContract      string         `gorm:"column:tokenRewardContract;type:varchar(50)" json:"tokenRewardContract"`
 	TokenReward              datatypes.JSON `gorm:"column:tokenReward" json:"tokenReward"`
 	RecurringType            string         `gorm:"column:recurringType;type:varchar(255)" json:"recurringType"`
 	SpaceID                  string         `gorm:"column:spaceId;type:varchar(50)" json:"spaceId"`
@@ -49,9 +49,9 @@ type Campaign struct {
 	ParticipantsCount        int            `gorm:"column:participantsCount;" json:"participantsCount"`
 	CredentialGroups         datatypes.JSON `gorm:"column:credentialGroups" json:"credentialGroups"`
 	DiscordRole              datatypes.JSON `gorm:"column:discordRole" json:"discordRole"`
-	Participants             datatypes.JSON
-	CredentialGroupResponses datatypes.JSON
-	Space                    datatypes.JSON
+	Participants             datatypes.JSON `gorm:"-"`
+	CredentialGroupResponses datatypes.JSON `gorm:"-"`
+	Space                    datatypes.JSON `gorm:"-"`
 }
 type CredentialGroupResponse struct {
 	CredentialGroup CredentialGroup `json:"credentialGroup"`

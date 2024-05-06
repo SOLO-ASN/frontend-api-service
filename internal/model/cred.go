@@ -1,18 +1,16 @@
 package model
 
-import "time"
-
 type Cred struct {
 	Model
-	CredentialGroupId string `gorm:"column:credentialGroupId;type:varchar(55)" json:"credentialGroupId"`
+	CredentialGroupId string `gorm:"column:credentialGroupId;type:varchar(2000)" json:"credentialGroupId"`
 	Description       string `gorm:"column:description;type:varchar(2000)" json:"description"`
-	Name              string `gorm:"column:name;type:varchar(50);" json:"name"`
-	CampaignId        string `gorm:"column:campaignId;type:varchar(55);" json:"campaignId"`
-	Type              string `gorm:"column:type;type:varchar(50);" json:"type"`
-	CredType          string `gorm:"column:cred_type;type:varchar(50);" json:"credType"`
+	Name              string `gorm:"column:Name;type:varchar(50);" json:"name"`
+	CampaignId        string `gorm:"column:campaignId;type:varchar(550);" json:"campaignId"`
+	Type              string `gorm:"column:Type;type:varchar(50);" json:"type"`
+	CredType          string `gorm:"column:CredType;type:varchar(50);" json:"credType"`
 	//CredSource            string `gorm:"column:cred_source;type:varchar(50); " json:"credSource"`
-	ReferenceLink string    `gorm:"column:reference_link;type:varchar(255);" json:"referenceLink"`
-	LastUpdate    time.Time `gorm:"column:last_update" json:"lastUpdate"`
+	ReferenceLink string `gorm:"column:ReferenceLink;type:varchar(255);" json:"referenceLink"`
+	LastUpdate    int    `gorm:"column:LastUpdate" json:"lastUpdate"`
 	//LastSync              int64  `gorm:"column:last_sync" json:"lastSync"`
 	//SyncStatus            string `gorm:"column:sync_status;type:varchar(50); " json:"syncStatus"`
 	//CredContractNFTHolder string `gorm:"column:cred_contract_nft_holder;type:varchar(100)" json:"credContractNFTHolder"`
