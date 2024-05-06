@@ -37,7 +37,7 @@ type Campaign struct {
 	RequireEmail             bool           `gorm:"column:requireEmail" json:"requireEmail"`
 	RequireUsername          bool           `gorm:"column:requireUsername" json:"requireUsername"`
 	DistributionType         string         `gorm:"column:distributiontype;type:varchar(255)" json:"distributionType"`
-	EndTime                  int            `gorm:"column:endtime" json:"endTime"`
+	EndTime                  int            `gorm:"column:endTime" json:"endTime"`
 	Cap                      int            `gorm:"column:cap" json:"cap"`
 	LoyaltyPoints            int            `gorm:"column:loyaltyPoints" json:"loyaltyPoints"`
 	TokenRewardContract      string         `gorm:"column:tokenRewardContract;type:varchar(50)" json:"tokenRewardContract"`
