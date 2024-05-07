@@ -5,13 +5,12 @@ import (
 	"api-service/internal/model"
 	"api-service/internal/types"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -46,14 +45,19 @@ func (cam *campaignRetriever) Create(c context.Context, request types.CampaignCr
 	var CregroupofCampaign model.CredentialGroupIds
 	var credsofgourp model.CredentialIds
 	var credgroups []types.CredentialGroup
+	var unixTimestamp2 int64
+	var unixTimestamp3 int64
 	unixTimestamp := time.Now().Unix()
 	campaign.SpaceID = request.SpaceID
 	campaign.Name = request.Name
-	data := request.Name
-	h := sha256.New()
-	h.Write([]byte(data))
-	sha256Hash := hex.EncodeToString(h.Sum(nil))
-	campaign.ID = sha256Hash
+
+	u, err := uuid.NewRandom()
+	if err != nil {
+		// 处理错误
+		fmt.Println("生成UUID时发生错误:", err)
+		return nil, "FAILED"
+	}
+	campaign.ID = u.String()
 	campaign.Description = request.Description
 	//campaign.TokenReward = request.TokenReward
 	campaign.StartTime = request.StartTime
@@ -63,41 +67,71 @@ func (cam *campaignRetriever) Create(c context.Context, request types.CampaignCr
 	//campaign.DiscordRole = request.DiscordRole
 	var cregroupids []string
 
-	err := json.Unmarshal([]byte(request.CredentialGroups), &credgroups)
+	err = json.Unmarshal([]byte(request.CredentialGroups), &credgroups)
 	if err != nil {
 		fmt.Println(err)
 	}
+	unixTimestamp2 = time.Now().Unix()
+	unixTimestamp3 = time.Now().Unix()
 	for _, cregroup := range credgroups {
-		data = cregroup.Description + campaign.ID
-		h.Write([]byte(data))
-		sha256Hash = hex.EncodeToString(h.Sum(nil))
-		credentialGroup.CreatedAt = int(unixTimestamp)
+
+		u1, err := uuid.NewRandom()
+		if err != nil {
+			// 处理错误
+			fmt.Println("生成UUID时发生错误:", err)
+			return nil, "FAILED"
+		}
+		credentialGroup.CreatedAt = int(unixTimestamp2)
+		unixTimestamp2 += 1
 		credentialGroup.Description = cregroup.Description
 		credentialGroup.Rewards, _ = json.Marshal(cregroup.Rewards)
-		credentialGroup.ID = sha256Hash
+		credentialGroup.ID = u1.String()
+		deSession1 := cam.db.Session(&gorm.Session{})
+		result1 := deSession1.Create(&credentialGroup)
+		deSession1 = cam.db.Session(&gorm.Session{})
+		deSession1 = deSession1.First(&credentialGroup)
 		var creids []string
+
+		unixTimestamp3 += 1
 		for _, cre := range cregroup.Creds {
+
+			u2, err := uuid.NewRandom()
+			if err != nil {
+				// 处理错误
+				fmt.Println("生成UUID时发生错误:", err)
+				return nil, "FAILED"
+			}
+			credential.ID = u2.String()
+			credential.CreatedAt = int(unixTimestamp3)
+			credential.UpdatedAt = int(unixTimestamp3)
+			unixTimestamp3 += 1
 			credential.CampaignId = campaign.ID
+
 			credential.CredentialGroupId = credentialGroup.ID
 			credential.Description = cre.Description
 			credential.CredType = cre.CredType
 			credential.Name = cre.Name
 			credential.ReferenceLink = cre.ReferenceLink
 
-			creids = append(creids, credentialGroup.ID)
-
 			deSession2 := cam.db.Session(&gorm.Session{})
 			result2 := deSession2.Create(&credential)
+			var credential2 model.Cred
+			deSession5 := cam.db.Session(&gorm.Session{})
+
+			deSession5 = deSession5.Order("created_at desc")
+			deSession5.First(&credential2)
+
+			creids = append(creids, credential2.ID)
+
 			if result2.Error != nil {
 				return nil, "FAILED"
 			}
 		}
-		credsofgourp.Ids = creids
-		credentialGroup.Creds, _ = json.Marshal(credsofgourp)
-		cregroupids = append(cregroupids, credentialGroup.ID)
-		deSession1 := cam.db.Session(&gorm.Session{})
-		result1 := deSession1.Create(&credentialGroup)
 
+		credsofgourp.Ids = creids
+		credentialGroup.CredentialIds, _ = json.Marshal(credsofgourp)
+		deSession1.Save(&credentialGroup)
+		cregroupids = append(cregroupids, credentialGroup.ID)
 		if result1.Error != nil {
 			return nil, "FAILED"
 		}

@@ -1,12 +1,12 @@
 package retriever
 
 import (
-	"context"
-	"errors"
-
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/model"
 	"api-service/internal/types"
+	"context"
+	"errors"
+	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -40,7 +40,9 @@ func (s spaceRetriever) Create(c context.Context, request *types.SpaceCreateRequ
 	deSession := s.db.Session(&gorm.Session{})
 	deSession = deSession.Model(user).Where("username = ?", request.Username)
 	deSession.First(&user)
-	space.Owner = string(user.Id)
+
+	space.Owner = strconv.FormatInt(int64(user.Id), 10)
+
 	deSession = s.db.Session(&gorm.Session{})
 	result := deSession.Create(&space) // 通过数据的指针来创建
 	if result.Error != nil {
@@ -94,6 +96,8 @@ func (s spaceRetriever) Query(c context.Context, request types.SpaceQueryRequest
 	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.Id)
 	deSession.First(&SpaceFollower)
 	space.IsFollowing = SpaceFollower.IsFollowing
-
+	if space.Owner == strconv.FormatInt(int64(user.Id), 10) {
+		space.IsOwner = true
+	}
 	return &space, nil
 }

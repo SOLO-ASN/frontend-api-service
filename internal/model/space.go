@@ -24,6 +24,7 @@ type Space struct {
 	Categories       datatypes.JSON `gorm:"column:categories" json:"categories"`
 	IsFollowing      bool           `json:"isFollowing" gorm:"-"`
 	Followers        int            `gorm:"column:followers" json:"followers"`
+	IsOwner          bool           `json:"isOwner" gorm:"-"`
 }
 
 func (s *Space) TableName() string {
