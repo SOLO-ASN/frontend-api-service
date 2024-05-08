@@ -29,6 +29,7 @@ func main() {
 	model.InitMysql()
 
 	host := defaultHTTPAddr
+
 	if cfg := config.Get(); cfg.App.Host != "" {
 		host = cfg.App.Host
 	}
