@@ -51,6 +51,11 @@ type CampaignCreateReqest struct {
 	CredentialGroups datatypes.JSON `json:"credentialGroups"`
 
 	DiscordRole datatypes.JSON `json:"discordRole"`
+
+	Thumbnail string `json:"thumbnail"`
+
+	TelegramBotApi string `json:"telegramBotApi"`
+	TelegramChatId string `json:"telegramChatId"`
 }
 
 type CampaignCreateResponse struct {

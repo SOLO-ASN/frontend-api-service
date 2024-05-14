@@ -50,7 +50,9 @@ func (cam *campaignRetriever) Create(c context.Context, request types.CampaignCr
 	unixTimestamp := time.Now().Unix()
 	campaign.SpaceID = request.SpaceID
 	campaign.Name = request.Name
-
+	campaign.Thumbnail = request.Thumbnail
+	campaign.TelegramBotApi = request.TelegramBotApi
+	campaign.TelegramChatId = request.TelegramChatId
 	u, err := uuid.NewRandom()
 	if err != nil {
 		// 处理错误

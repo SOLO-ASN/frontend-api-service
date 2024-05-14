@@ -22,8 +22,12 @@ func NewHTTPServer(addr string, opts ...HTTPOptionFunc) IServer {
 
 	// create http server
 	gin.SetMode(opt.mode)
+	staticDir := "/home/l6-809/go/src/github.com/Solo-Mission/uploadImages"
 
+	// 使用Static方法注册静态文件目录
+	// 这里的"/static"是URL路径前缀，"./static"是服务器上的目录路径
 	handler := routers.NewRouter()
+	handler.Static("/static", staticDir)
 
 	server := &http.Server{
 		Addr:         addr,

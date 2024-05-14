@@ -1,15 +1,19 @@
 package handler
 
 import (
-	"net/http"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
 
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/model"
 	"api-service/internal/response"
 	"api-service/internal/retriever"
-	"api-service/internal/types"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type IImagesHandler interface {
@@ -36,24 +40,43 @@ func (s imagesHandler) Create(c *gin.Context) {
 
 func (s imagesHandler) Upload(c *gin.Context) {
 	//TODO implement me
-	form := &types.ImageUploadRequest{}
-	err := c.ShouldBindJSON(form)
-
-	uploadPath := "/home/node/picture"
+	err := c.Request.ParseMultipartForm(200000)
 	if err != nil {
-		response.Error(c, response.WithCodeMessage{
-			Code:    http.StatusBadRequest,
-			Message: "invalid request parameters",
-		}, err)
-		return
+		log.Fatal(err)
 	}
+	// 获取表单
+	form := c.Request.MultipartForm
+	// 获取参数upload后面的多个文件名，存放到数组files里面
+	files := form.File["file"]
+	// 遍历数组，每取出一个file就拷贝一次
+	for _, file := range files {
+		fileHandle, err := file.Open()
+		defer fileHandle.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		u := uuid.New()
+		// 为文件生成一个新的文件名，以避免冲突
+		newFileName := fmt.Sprintf("%s_%s", u, file.Filename) // 这里可以根据需要生成不同的文件名格式
 
-	res, _ := s.retriever.Upload(c, *form, uploadPath)
+		// 指定文件保存的路径
+		filePath := filepath.Join("/home/l6-809/go/src/github.com/Solo-Mission/uploadImages", newFileName)
 
-	// assume we got all the data
-	response.OutPut(c, response.WithCodeMessage{
-		Code:    62001,
-		Message: "SUCCESSED",
-	}, res)
+		out, err := os.Create(filePath)
+		defer out.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = io.Copy(out, fileHandle)
+		if err != nil {
+			log.Fatal(err)
+		}
+		backfilePath := filepath.Join("https://airdrop.aspark.space/static/", newFileName)
+		response.OutPut(c, response.WithCodeMessage{
+			Code:    62001,
+			Message: "SUCCESSED",
+		}, backfilePath)
+	}
 
 }
