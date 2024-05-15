@@ -5,6 +5,7 @@ import (
 	"api-service/internal/model"
 	"context"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -44,7 +45,14 @@ func (u userRetriever) GetById(ctx context.Context, uuid string) (*model.User, e
 
 func (u userRetriever) GetByName(ctx context.Context, name string) (*model.User, error) {
 	//TODO implement me
-	panic("implement me")
+	user := &model.User{}
+
+	err := u.db.Model(user).Where("name = ?", name).First(user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("user not found")
+	}
+	fmt.Println(user)
+	return user, nil
 }
 
 func (u userRetriever) CheckDuplicateName(ctx context.Context, table *model.User) bool {
