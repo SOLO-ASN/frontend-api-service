@@ -13,7 +13,7 @@ type UserRetriever interface {
 	GetById(ctx context.Context, uuid string) (*model.User, error)
 	GetByName(ctx context.Context, name string) (*model.User, error)
 	CheckDuplicateName(ctx context.Context, table *model.User) bool
-	UpdateSocialAccountById(ctx context.Context, table *model.User) error
+	UpdateSocialAccountById(ctx context.Context, username string, table *model.User) error
 	UpdateEmailById(ctx context.Context, table *model.User) error
 	UpdateById(ctx context.Context, table *model.User) error
 	DeleteById(ctx context.Context, uuid string) error
@@ -61,7 +61,7 @@ func (u userRetriever) CheckDuplicateName(ctx context.Context, table *model.User
 	}
 }
 
-func (u userRetriever) UpdateSocialAccountById(ctx context.Context, table *model.User) error {
+func (u userRetriever) UpdateSocialAccountById(ctx context.Context, username string, table *model.User) error {
 	updates := make(map[string]interface{})
 
 	// check
@@ -84,7 +84,12 @@ func (u userRetriever) UpdateSocialAccountById(ctx context.Context, table *model
 		updates["telegram_account_id"] = table.SocialAccount.TelegramAccountId
 		updates["telegram_account_name"] = table.SocialAccount.TelegramAccountName
 	}
-	if err := u.db.Model(table).Where("id = ?", table.ID).Updates(updates).Error; err != nil {
+	err := u.db.Model(table).Where("id =?", table.ID).First(&model.User{}).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New("user not found")
+	}
+
+	if err = u.db.Model(table).Where("name = ?", username).Updates(updates).Error; err != nil {
 		return err
 	}
 	return nil
