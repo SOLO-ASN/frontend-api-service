@@ -84,7 +84,7 @@ func (u userRetriever) UpdateSocialAccountById(ctx context.Context, username str
 		updates["telegram_account_id"] = table.SocialAccount.TelegramAccountId
 		updates["telegram_account_name"] = table.SocialAccount.TelegramAccountName
 	}
-	err := u.db.Model(table).Where("id =?", table.ID).First(&model.User{}).Error
+	err := u.db.Model(table).Where("name = ?", username).First(&model.User{}).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("user not found")
 	}
