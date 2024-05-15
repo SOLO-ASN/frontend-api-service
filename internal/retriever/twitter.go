@@ -11,8 +11,8 @@ import (
 	"github.com/g8rswimmer/go-twitter"
 )
 
-func twitter2() {
-	url := "https://api.twitter.com/1.1/users/show.json?screen_name=TwitterDev"
+func Twitter2() {
+	url := "https://api.twitter.com/1.1/users/show.json?screen_name=elonmusk"
 
 	// Create a new HTTP client
 	client := &http.Client{}
@@ -59,13 +59,17 @@ func (a authorize) Add(req *http.Request) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
 }
 
-/**
+/*
+*
+
 	In order to run, the user will need to provide the bearer token.
-**/
+
+*
+*/
 func Twitter1() {
 	token := flag.String("token", "", "AAAAAAAAAAAAAAAAAAAAAExNtgEAAAAAhS%2B4%2FuMez2QA0IPx03GPfFnPtCs%3DaDAt47w0djF7FdoWRxlx59eV96PM84I4qxPhQoBZfMp9mWKs87")
 	flag.Parse()
-	fmt.Println()
+	fmt.Println(*token)
 	tweet := &twitter.Tweet{
 		Authorizer: authorize{
 			Token: *token,

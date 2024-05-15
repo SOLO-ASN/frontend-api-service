@@ -52,6 +52,8 @@ type Campaign struct {
 	Participants             datatypes.JSON `gorm:"-"`
 	CredentialGroupResponses datatypes.JSON `gorm:"-"`
 	Space                    datatypes.JSON `gorm:"-"`
+	TelegramBotApi           string         `gorm:"column:telegramBotApi;type:varchar(400)"`
+	TelegramChatId           string         `gorm:"column:telegramChatId;type:varchar(400)" json:"telegramChatId"`
 }
 type CredentialGroupResponse struct {
 	CredentialGroup CredentialGroup `json:"credentialGroup"`

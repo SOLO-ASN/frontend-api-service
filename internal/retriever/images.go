@@ -33,9 +33,30 @@ func NewImagesRetriever(db *gorm.DB, cache *cache.Cache) ImagesRetriever {
 // }
 
 /*
-
  */
 func (s imagesRetriever) Upload(c1 context.Context, request types.ImageUploadRequest, uploadPath string) (types.ImageUploadResponse, error) {
+
+	// var c *gin.Context
+	//r1()
+	// file, err := c.FormFile("file")
+	// if err != nil {
+
+	// 	c.JSON(http.StatusOK, fmt.Sprintf("'%s' uploaded", file.Filename))
+	// 	return types.ImageUploadResponse{}, nil
+	// }
+
+	// filepath := path.Join("./"+"images/", file.Filename)
+	// err = c.SaveUploadedFile(file, filepath)
+	// if err != nil {
+
+	// 	c.JSON(http.StatusOK, err.Error())
+	// 	return types.ImageUploadResponse{}, nil
+	// }
+	// c.JSON(http.StatusOK, gin.H{"uploading": "done", "message": "success", "url": "http://" + c.Request.Host + "images/" + file.Filename})
+
+	return types.ImageUploadResponse{Url: "http://yourdomain.com/"}, nil
+}
+func Upload1(request types.ImageUploadRequest, uploadPath string) (types.ImageUploadResponse, error) {
 
 	// var c *gin.Context
 	//r1()
