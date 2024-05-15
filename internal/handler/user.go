@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -19,6 +20,7 @@ type IUserHandler interface {
 	Create(c *gin.Context)
 	UpdateById(c *gin.Context)
 	GetById(c *gin.Context)
+	GetByName(c *gin.Context)
 	UpdateSocialAccountById(c *gin.Context)
 	UpdateEmailById(c *gin.Context)
 	UpdateAddressById(c *gin.Context)
@@ -187,6 +189,22 @@ func (u *userHandler) UpdateById(c *gin.Context) {
 func (u *userHandler) GetById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (u *userHandler) GetByName(c *gin.Context) {
+	name := c.Param("name")
+
+	user, err := u.retriever.GetByName(c, name)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+	response.Success(c, gin.H{
+		"addressInfo": user,
+	})
 }
 
 func (u *userHandler) DeleteById(c *gin.Context) {

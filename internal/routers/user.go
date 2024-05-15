@@ -30,6 +30,8 @@ func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	rg.DELETE("/delete", h.DeleteById)
 	// get user
 	rg.POST("/info", h.GetById)
+	// get user by name
+	rg.POST("/info/:name", h.GetByName)
 	// check twitter account
 	rg.POST("/checkTwitterAccount", h.CheckTwitterAccount)
 }
