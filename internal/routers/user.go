@@ -14,7 +14,7 @@ func init() {
 func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	// todo if you want to add jwt auth, you can add it here.
 	// like this: rg.Use(jwtMiddleware.MiddlewareFunc())
-	rg.Use(func(c *gin.Context) { c.Set("uuid", "68decb8d-944c-403a-b010-a342b0d9d5c3") })
+	//rg.Use(func(c *gin.Context) {c.Set("uuid", "68decb8d-944c-403a-b010-a342b0d9d5c3")})
 
 	// check username duplicate
 	rg.POST("/check", h.CheckDuplicate)

@@ -50,11 +50,18 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 		}, err)
 		return
 	}
+	// check login
+	// todo add jwt checker
+	if form.UserName == "" {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "NOT_LOGIN",
+		})
+		return
+	}
+
 	//
 	sAccount := &model.User{
-		Model: model.Model{
-			ID: c.GetString("uuid"),
-		},
 		SocialAccount: model.SocialAccount{
 			XAccountId:          form.XAccount.Id,
 			XAccountName:        form.XAccount.Name,
@@ -65,9 +72,9 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 			TelegramAccountId:   form.TelegramAccount.Id,
 			TelegramAccountName: form.TelegramAccount.Name,
 		}}
-	err = u.retriever.UpdateSocialAccountById(c, sAccount)
+	err = u.retriever.UpdateSocialAccountById(c, form.UserName, sAccount)
 	if err != nil {
-		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
+		logger.DefaultLogger().Error("Update error: ", zap.Error(err))
 		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),

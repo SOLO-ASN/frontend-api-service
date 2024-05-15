@@ -18,10 +18,11 @@ type GetUserResponse struct {
 }
 
 type UpdateSocialAccountRequest struct {
-	XAccount        x `json:"xAccount" binding:""`
-	GithubAccount   x `json:"githubAccount" binding:""`
-	DiscordAccount  x `json:"discordAccount" binding:""`
-	TelegramAccount x `json:"telegramAccount" binding:""`
+	UserName        string `json:"username" binding:""`
+	XAccount        x      `json:"xAccount" binding:""`
+	GithubAccount   x      `json:"githubAccount" binding:""`
+	DiscordAccount  x      `json:"discordAccount" binding:""`
+	TelegramAccount x      `json:"telegramAccount" binding:""`
 }
 
 type x struct {
