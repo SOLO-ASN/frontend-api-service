@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -107,11 +108,11 @@ func (u userRetriever) UpdateEmailById(ctx context.Context, table *model.User) e
 	updates := make(map[string]interface{})
 
 	// check
-	if table.Email != "" {
+	if table.Email != nil {
 		updates["email"] = table.Email
 	}
 
-	if err := u.db.Model(table).Where("id =?", table.ID).Updates(updates).Error; err != nil {
+	if err := u.db.Model(table).Where("name =?", table.Name).Updates(updates).Error; err != nil {
 		return err
 	}
 	return nil

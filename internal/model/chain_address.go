@@ -1,8 +1,8 @@
 package model
 
 type ChainAddress struct {
-	UUID     string `gorm:"column:uuid;type:varchar(36)" json:"uuid"`
-	MainAddr string `gorm:"column:main_addr;type:varchar(50);NOT NULL" json:"mainAddr"`
+	UUID     string  `gorm:"column:uuid;type:varchar(36)" json:"uuid"`
+	MainAddr *string `gorm:"column:main_addr;type:varchar(50);unique" json:"mainAddr"`
 
 	//EthLike []EthChainAddress
 }

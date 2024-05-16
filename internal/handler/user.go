@@ -11,6 +11,7 @@ import (
 	"api-service/internal/response"
 	"api-service/internal/retriever"
 	"api-service/internal/types"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -106,7 +107,7 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 		Model: model.Model{
 			ID: c.GetString("uuid"),
 		},
-		Email: form.Email,
+		Email: &form.Email,
 	}
 	err = u.retriever.UpdateEmailById(c, e)
 	if err != nil {
@@ -158,10 +159,15 @@ func (u *userHandler) Create(c *gin.Context) {
 	user := &model.User{}
 	user.Name = form.Name
 	user.Avatar = form.Avatar
-	user.Email = form.Email
+	if form.Email == "" {
+		user.Email = nil
+	}
+	// user.Email = form.Email
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>> ", form.Avatar == "", form.Email == "", user.Email == nil)
 
+	//
 	err = u.retriever.Create(c, user)
-
+	// err = nil
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
 		if strings.Contains(err.Error(), "Error 1062") {
