@@ -14,7 +14,7 @@ func init() {
 func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	// todo if you want to add jwt auth, you can add it here.
 	// like this: rg.Use(jwtMiddleware.MiddlewareFunc())
-	rg.Use(func(c *gin.Context) { c.Set("uuid", "68decb8d-944c-403a-b010-a342b0d9d5c3") })
+	//rg.Use(func(c *gin.Context) {c.Set("uuid", "68decb8d-944c-403a-b010-a342b0d9d5c3")})
 
 	// check username duplicate
 	rg.POST("/check", h.CheckDuplicate)
@@ -30,4 +30,8 @@ func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	rg.DELETE("/delete", h.DeleteById)
 	// get user
 	rg.POST("/info", h.GetById)
+	// get user by name
+	rg.POST("/info/:name", h.GetByName)
+	// check twitter account
+	rg.POST("/checkTwitterAccount", h.CheckTwitterAccount)
 }

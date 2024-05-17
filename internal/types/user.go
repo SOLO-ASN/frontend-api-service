@@ -18,10 +18,11 @@ type GetUserResponse struct {
 }
 
 type UpdateSocialAccountRequest struct {
-	XAccount        x `json:"xAccount" binding:""`
-	GithubAccount   x `json:"githubAccount" binding:""`
-	DiscordAccount  x `json:"discordAccount" binding:""`
-	TelegramAccount x `json:"telegramAccount" binding:""`
+	UserName        string `json:"username" binding:""`
+	XAccount        x      `json:"xAccount" binding:""`
+	GithubAccount   x      `json:"githubAccount" binding:""`
+	DiscordAccount  x      `json:"discordAccount" binding:""`
+	TelegramAccount x      `json:"telegramAccount" binding:""`
 }
 
 type x struct {
@@ -33,4 +34,14 @@ type UpdateEmailRequest struct {
 	Address          string `json:"address" binding:""`
 	Email            string `json:"email" binding:""`
 	VerificationCode string `json:"verificationCode" binding:""`
+}
+
+type CheckTwitterAccountResponse struct {
+	CheckTwitterAccount *TwitterAccount `json:"checkTwitterAccount"`
+	Verified            bool            `json:"verified"`
+}
+
+type TwitterAccount struct {
+	TwitterUserID   string `json:"twitterUserId" binding:""`
+	TwitterUserName string `json:"twitterUserName" binding:""`
 }

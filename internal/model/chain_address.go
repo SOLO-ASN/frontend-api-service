@@ -1,17 +1,15 @@
 package model
 
 type ChainAddress struct {
-	Model
+	UUID     string  `gorm:"column:uuid;type:varchar(36)" json:"uuid"`
+	MainAddr *string `gorm:"column:main_addr;type:varchar(50);unique" json:"mainAddr"`
 
-	UUID     string `gorm:"column:uuid;type:varchar(36)" json:"uuid"`
-	MainAddr string `gorm:"column:main_addr;type:varchar(50);NOT NULL" json:"mainAddr"`
-
-	EthLike []EthChainAddress
-	Aptos   []AptosChainAddress
+	//EthLike []EthChainAddress
 }
 
 type EthChainAddress struct {
-	Model
+	UUID     string `gorm:"column:uuid;type:varchar(36)" json:"uuid"`
+	UserName string `gorm:"column:user_name;type:varchar(50);NOT"`
 
 	BaseChain
 
@@ -19,8 +17,6 @@ type EthChainAddress struct {
 }
 
 type AptosChainAddress struct {
-	Model
-
 	BaseChain
 
 	// todo add more info

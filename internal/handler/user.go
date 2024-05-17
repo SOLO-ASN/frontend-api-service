@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -20,10 +21,12 @@ type IUserHandler interface {
 	Create(c *gin.Context)
 	UpdateById(c *gin.Context)
 	GetById(c *gin.Context)
+	GetByName(c *gin.Context)
 	UpdateSocialAccountById(c *gin.Context)
 	UpdateEmailById(c *gin.Context)
 	UpdateAddressById(c *gin.Context)
 	DeleteById(c *gin.Context)
+	CheckTwitterAccount(c *gin.Context)
 }
 
 func NewUserHandler() IUserHandler {
@@ -50,11 +53,18 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 		}, err)
 		return
 	}
+	// check login
+	// todo add jwt checker
+	if form.UserName == "" {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "NOT_LOGIN",
+		})
+		return
+	}
+
 	//
 	sAccount := &model.User{
-		Model: model.Model{
-			ID: c.GetString("uuid"),
-		},
 		SocialAccount: model.SocialAccount{
 			XAccountId:          form.XAccount.Id,
 			XAccountName:        form.XAccount.Name,
@@ -65,9 +75,9 @@ func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
 			TelegramAccountId:   form.TelegramAccount.Id,
 			TelegramAccountName: form.TelegramAccount.Name,
 		}}
-	err = u.retriever.UpdateSocialAccountById(c, sAccount)
+	err = u.retriever.UpdateSocialAccountById(c, form.UserName, sAccount)
 	if err != nil {
-		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
+		logger.DefaultLogger().Error("Update error: ", zap.Error(err))
 		response.Error(c, response.WithCodeMessage{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
@@ -97,7 +107,7 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 		Model: model.Model{
 			ID: c.GetString("uuid"),
 		},
-		Email: form.Email,
+		Email: &form.Email,
 	}
 	err = u.retriever.UpdateEmailById(c, e)
 	if err != nil {
@@ -145,15 +155,15 @@ func (u *userHandler) Create(c *gin.Context) {
 		c.JSON(32001, "invalid params") // todo refactor
 		return
 	}
-	//
+	
 	user := &model.User{}
 	user.Name = form.Name
 	user.Avatar = form.Avatar
-	user.Email = form.Email
-	user.Main_addr = "11111"
+	if form.Email == "" {
+		user.Email = nil
+	}
 
 	err = u.retriever.Create(c, user)
-
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
 		if strings.Contains(err.Error(), "Error 1062") {
@@ -183,7 +193,37 @@ func (u *userHandler) GetById(c *gin.Context) {
 	panic("implement me")
 }
 
+func (u *userHandler) GetByName(c *gin.Context) {
+	name := c.Param("name")
+
+	user, err := u.retriever.GetByName(c, name)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+	response.Success(c, gin.H{
+		"addressInfo": user,
+	})
+}
+
 func (u *userHandler) DeleteById(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (u *userHandler) CheckTwitterAccount(c *gin.Context) {
+	// use mock data
+	response.OutPut(c, response.WithCodeMessage{
+		Code:    62001,
+		Message: "LOGIN",
+	}, &types.CheckTwitterAccountResponse{
+		CheckTwitterAccount: &types.TwitterAccount{
+			TwitterUserID:   "897858341040410624",
+			TwitterUserName: "XUserName",
+		},
+		Verified: true,
+	})
 }
