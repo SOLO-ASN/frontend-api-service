@@ -3,7 +3,7 @@ package model
 type SpaceFollower struct {
 	ID            int    `gorm:"type:string;aouto_increment;primary_key" json:"id"`
 	SpaceId       string `gorm:"column:spaceId;type:varchar(255)" json:"spaceId"`
-	ParticipantId int    `gorm:"column:participantId" json:"participantId"`
+	ParticipantId string `gorm:"column:participantId;type:varchar(255)" json:"participantId"`
 	IsFollowing   bool   `gorm:"column:isFollowing;" json:"isFollowing"`
 
 	// ParticipantsCount       int `gorm:"column:participants_count;NOT NULL" json:"participantsCount"`

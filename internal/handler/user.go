@@ -155,19 +155,15 @@ func (u *userHandler) Create(c *gin.Context) {
 		c.JSON(32001, "invalid params") // todo refactor
 		return
 	}
-	//
+	
 	user := &model.User{}
 	user.Name = form.Name
 	user.Avatar = form.Avatar
 	if form.Email == "" {
 		user.Email = nil
 	}
-	// user.Email = form.Email
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>> ", form.Avatar == "", form.Email == "", user.Email == nil)
 
-	//
 	err = u.retriever.Create(c, user)
-	// err = nil
 	if err != nil {
 		logger.DefaultLogger().Error("Create error: ", zap.Error(err))
 		if strings.Contains(err.Error(), "Error 1062") {

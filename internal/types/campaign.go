@@ -18,6 +18,11 @@ type CampaignQueryReqest struct {
 	// SearchString string        `json:"searchString"`
 	Id string `json:"id" binding:""`
 }
+
+type CmapaignIsCompleteRequst struct {
+	CampaigId string `json:"CampaigId"`
+	Username  string `json:"username"`
+}
 type CredentialGroupResponse struct {
 	CredentialGroup model.CredentialGroup
 	Credentails     []model.Cred

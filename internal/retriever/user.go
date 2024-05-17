@@ -5,7 +5,6 @@ import (
 	"api-service/internal/model"
 	"context"
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -52,7 +51,6 @@ func (u userRetriever) GetByName(ctx context.Context, name string) (*model.User,
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errors.New("user not found")
 	}
-	fmt.Println(user)
 	return user, nil
 }
 
