@@ -20,8 +20,13 @@ type CampaignQueryReqest struct {
 }
 
 type CmapaignIsCompleteRequst struct {
-	CampaigId string `json:"CampaigId"`
+	CampaigId string `json:"Campaigid"`
 	Username  string `json:"username"`
+}
+
+type IsCredentialCompleteRequst struct {
+	CredentialId string `json:"credentialid"`
+	Username     string `json:"username"`
 }
 type CredentialGroupResponse struct {
 	CredentialGroup model.CredentialGroup

@@ -22,6 +22,8 @@ type CampaignRetriever interface {
 	Create(c context.Context, request types.CampaignCreateReqest) (error, string)
 	Query(c context.Context, queryRequest types.CampaignQueryReqest) (*types.CampaignQueryResponse, error)
 	TelegramisFollow(ctx context.Context, request types.TelegramIsFollowRequest) (string, error)
+	IsComplete(c context.Context, queryRequest types.CmapaignIsCompleteRequst) (string, error)
+	IsCredentialComplete(c context.Context, queryRequest types.IsCredentialCompleteRequst) (string, error)
 }
 
 type campaignRetriever struct {
@@ -229,6 +231,7 @@ func (t *campaignRetriever) TelegramisFollow(ctx context.Context, request types.
 	var BotApi string
 	var ChatId string
 	var UserID string
+	fmt.Println(3)
 	success := "Follow Success"
 	deSession := t.db.Session(&gorm.Session{})
 	deSession = deSession.Model(Campaign).Where("id = ?", request.CampaignId)
@@ -238,6 +241,7 @@ func (t *campaignRetriever) TelegramisFollow(ctx context.Context, request types.
 	}
 	BotApi = Campaign.TelegramBotApi
 	ChatId = Campaign.TelegramChatId
+
 	deSession = t.db.Session(&gorm.Session{})
 	deSession = deSession.Model(user).Where("name = ?", request.Username)
 	res1 := deSession.First(&user)
@@ -257,7 +261,7 @@ func (t *campaignRetriever) TelegramisFollow(ctx context.Context, request types.
 	}
 
 	member, _ := b.GetChatMember(context.Background(), &param)
-	if member.Member == nil {
+	if member.Owner == nil {
 		return "NO_FOLLLOW", nil
 	}
 	deSession = t.db.Session(&gorm.Session{})
@@ -270,16 +274,23 @@ func (t *campaignRetriever) TelegramisFollow(ctx context.Context, request types.
 
 	deSession = t.db.Session(&gorm.Session{})
 	deSession = deSession.Model(credentialParticipant).Where("CredentialId = ? AND ParticipantId = ? ", credential.ID, user.ID)
-
+	u, err := uuid.NewRandom()
+	if err != nil {
+		// 处理错误
+		fmt.Println("生成UUID时发生错误:", err)
+		return "FAILED", nil
+	}
 	res4 := deSession.First(&credentialParticipant)
 
 	if res4.Error != nil {
 		credParticipant := model.CredentialParticipant{
+			ID:            u.String(),
 			CredentialId:  credential.ID,
 			ParticipantId: user.ID,
 			Status:        true,
 		}
 		deSession = t.db.Session(&gorm.Session{})
+		deSession = deSession.Model(credParticipant)
 		result := deSession.Create(&credParticipant) // 通过数据的指针来创建
 		if result.Error != nil {
 
@@ -299,6 +310,7 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 	var Campaignparticipant model.CampaignParticipant
 
 	var participant model.User
+	var pointOfCampaign int
 
 	var credentialGroupIds model.CredentialGroupIds
 	var credentialGroup model.CredentialGroup
@@ -314,10 +326,10 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 	if err := deSession.First(&campaign, "id = ?", queryRequest.CampaigId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 未找到记录
-			return "NOT_CAMPAIGN", err
+			return "NOT_CAMPAIGN", nil
 		}
 		// 发生了其他错误
-		return "NOT_CAMPAIGN", err
+		return "NOT_CAMPAIGN", nil
 	}
 	json.Unmarshal(campaign.CredentialGroups, &credentialGroupIds)
 	deSession = cam.db.Session(&gorm.Session{})
@@ -326,12 +338,20 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 
 	for _, credentialGroupid := range credentialGroupIds.Ids {
 
-		deSession = cam.db.Session(&gorm.Session{})
-		deSession = deSession.Model(credentialGroupParticipant).Where("CredentialGroupId=? AND ParticipantId=?", credentialGroupid, participant.ID)
-		res := deSession.First(credentialGroupParticipant)
+		deSession2 := cam.db.Session(&gorm.Session{})
+		deSession2 = deSession2.Model(credentialGroupParticipant).Where("credentialGroupId= ? AND participantId= ?", credentialGroupid, participant.ID)
+		res := deSession2.First(&credentialGroupParticipant)
+
 		if res.Error != nil {
 			var credentialGrouppart model.CredentialGroupParticipant
+			u1, err := uuid.NewRandom()
+			if err != nil {
+				// 处理错误
+				fmt.Println("生成UUID时发生错误:", err)
+				return "FAILED", nil
+			}
 			credentialGrouppart = model.CredentialGroupParticipant{
+				ID:                u1.String(),
 				ParticipantId:     participant.ID,
 				CredentialGroupId: credentialGroupid,
 			}
@@ -379,7 +399,7 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 			deSession.Find(&CredentialParticipants)
 			for _, credParticipant := range CredentialParticipants {
 
-				if credParticipant.Status != true {
+				if !credParticipant.Status {
 
 					credentialGroupParticipant.Status = false
 					deSession1 := cam.db.Session(&gorm.Session{})
@@ -388,12 +408,41 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 				}
 			}
 			credentialGroupParticipant.Status = true
+			var CreGroup model.CredentialGroup
+			var Rewards model.Rewards
+			deSession3 := cam.db.Session(&gorm.Session{})
+			deSession3 = deSession3.Model(CreGroup)
+			deSession3.First(&CreGroup)
+			err := json.Unmarshal([]byte(CreGroup.Rewards), &Rewards)
+			if err != nil {
+				fmt.Println(err)
+			}
+			intVal, _ := strconv.ParseInt(Rewards.Points, 10, 64)
+			credentialGroupParticipant.Point = int(intVal)
+			pointOfCampaign += int(intVal)
 			deSession1 := cam.db.Session(&gorm.Session{})
-			deSession1.Model(credentialGroupParticipant).Save(&credentialGroupParticipant)
+			deSession1.Save(&credentialGroupParticipant)
 		}
 
 	}
 	deSession = cam.db.Session(&gorm.Session{})
-	deSession.Model(Campaignparticipant).Where("campaignId=? AND participantId =? ", queryRequest.CampaigId, participant.ID)
+	deSession = deSession.Model(Campaignparticipant).Where("campaignId=? AND participantId =? ", queryRequest.CampaigId, participant.ID)
+	Campaignparticipant.Status = true
+	Campaignparticipant.Point = pointOfCampaign
+	deSession.Save(&Campaignparticipant)
+	return "COMPLETE", nil
+}
+func (cam *campaignRetriever) IsCredentialComplete(c context.Context, queryRequest types.IsCredentialCompleteRequst) (string, error) {
+	var credentialParticipant model.CredentialParticipant
+	var participant model.User
+	deSession := cam.db.Session(&gorm.Session{})
+	deSession = deSession.Model(participant).Where("name = ?", queryRequest.Username)
+	deSession.First(&participant)
+	deSession = cam.db.Session(&gorm.Session{})
+	deSession = deSession.Model(credentialParticipant).Where("CredentialId = ? AND ParticipantId= ? ", queryRequest.CredentialId, participant.ID)
+	deSession.First(&credentialParticipant)
+	if credentialParticipant.Status != true {
+		return "NOT_COMPLETE", nil
+	}
 	return "COMPLETE", nil
 }
