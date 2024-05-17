@@ -23,5 +23,7 @@ func campaignGroup(rg *gin.RouterGroup, h handler.ICampaignHandler) {
 	rg.POST("/query", h.Query)
 	rg.POST("/create", h.Create)
 	rg.POST("/telegramisFollow", h.TelegramisFollow)
+	rg.POST("/isComplete", h.IsComplete)
+	rg.POST("/isCredentialComplete", h.IsCredentialComplete)
 
 }

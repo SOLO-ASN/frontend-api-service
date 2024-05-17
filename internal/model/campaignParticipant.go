@@ -5,7 +5,7 @@ type CampaignParticipant struct {
 	CampaignId    string `gorm:"column:campaignId;type:varchar(255)" json:"campaignId"`
 	ParticipantId string `gorm:"column:participantId;type:varchar(255)" json:"participantId"`
 	Status        bool   `gorm:"column:status;type:bool" json:"status"`
-	Point         int    `gorm:"column:point;" json:"point"`
+	Point         int    `gorm:"column:point;type:int" json:"point"`
 	// ParticipantsCount       int `gorm:"column:participants_count;NOT NULL" json:"participantsCount"`
 	// BountyWinnersCount      int `gorm:"column:bounty_winners_count;NOT NULL" json:"bountyWinnersCount"`
 	// Participants_connection participants_connection

@@ -16,6 +16,8 @@ type ICampaignHandler interface {
 	Create(c *gin.Context)
 	Query(c *gin.Context)
 	TelegramisFollow(c *gin.Context)
+	IsComplete(c *gin.Context)
+	IsCredentialComplete(c *gin.Context)
 }
 
 type campaignHandler struct {
@@ -70,6 +72,7 @@ func (h *campaignHandler) Query(c *gin.Context) {
 
 func (h *campaignHandler) TelegramisFollow(c *gin.Context) {
 	form := &types.TelegramIsFollowRequest{}
+
 	err := c.ShouldBindJSON(form)
 	if err != nil {
 		response.Error(c, response.WithCodeMessage{
@@ -86,6 +89,51 @@ func (h *campaignHandler) TelegramisFollow(c *gin.Context) {
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{
 		Code:    62001,
-		Message: "campaign query success",
+		Message: "query success",
+	}, res)
+}
+
+func (h *campaignHandler) IsComplete(c *gin.Context) {
+	form := &types.CmapaignIsCompleteRequst{}
+
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+
+	// db handle campaign query
+
+	res, _ := h.retriever.IsComplete(c, *form)
+
+	// assume we got all the data
+	response.OutPut(c, response.WithCodeMessage{
+		Code:    62001,
+		Message: "query success",
+	}, res)
+}
+func (h *campaignHandler) IsCredentialComplete(c *gin.Context) {
+	form := &types.IsCredentialCompleteRequst{}
+
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+
+	// db handle campaign query
+
+	res, _ := h.retriever.IsCredentialComplete(c, *form)
+
+	// assume we got all the data
+	response.OutPut(c, response.WithCodeMessage{
+		Code:    62001,
+		Message: "query success",
 	}, res)
 }
