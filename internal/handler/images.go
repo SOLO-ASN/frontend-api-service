@@ -72,7 +72,7 @@ func (s imagesHandler) Upload(c *gin.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		backfilePath := filepath.Join("https://airdrop.aspark.space/static/", newFileName)
+		backfilePath := "https://airdrop.aspark.space/static/" + newFileName
 		response.OutPut(c, response.WithCodeMessage{
 			Code:    62001,
 			Message: "SUCCESSED",

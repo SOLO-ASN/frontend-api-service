@@ -10,6 +10,7 @@ import (
 	"api-service/internal/response"
 	"api-service/internal/retriever"
 	"api-service/internal/types"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -149,6 +150,7 @@ func (u *userHandler) Create(c *gin.Context) {
 	user.Name = form.Name
 	user.Avatar = form.Avatar
 	user.Email = form.Email
+	user.Main_addr = "11111"
 
 	err = u.retriever.Create(c, user)
 

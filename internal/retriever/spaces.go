@@ -45,7 +45,7 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 	var HasNextPage bool
 	var SpaceFollower model.SpaceFollower
 	var SpaceFollowers []model.SpaceFollower
-	var user model.Jpa_web_authn_user
+	var user model.User
 	HasNextPage = true
 	if request.Filter == "follow" {
 		if &request.Username == nil {
@@ -53,10 +53,10 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 		}
 
 		deSession := s.db.Session(&gorm.Session{})
-		deSession = deSession.Model(user).Where("username = ?", request.Username)
+		deSession = deSession.Model(user).Where("name = ?", request.Username)
 		deSession.First(&user)
 		deSession = s.db.Session(&gorm.Session{})
-		deSession = deSession.Model(SpaceFollower).Where("participantId = ? ", user.Id)
+		deSession = deSession.Model(SpaceFollower).Where("participantId = ? ", user.ID)
 		res := deSession.Find(&SpaceFollowers)
 		if res.Error != nil {
 			return &spaces, after, HasNextPage, nil
@@ -130,13 +130,13 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 
 	if request.Username != "" {
 		deSession = s.db.Session(&gorm.Session{})
-		deSession = deSession.Model(user).Where("username = ?", request.Username)
+		deSession = deSession.Model(user).Where("name = ?", request.Username)
 		deSession.First(&user)
 
 		for i, space := range spaces {
 			var SpaceFollower1 model.SpaceFollower
 			deSession1 := s.db.Session(&gorm.Session{})
-			deSession1 = deSession1.Model(SpaceFollower1).Where("participantId = ? AND spaceId = ? ", user.Id, space.ID)
+			deSession1 = deSession1.Model(SpaceFollower1).Where("participantId = ? AND spaceId = ? ", user.ID, space.ID)
 			res := deSession1.First(&SpaceFollower1)
 			if res.Error != nil {
 				spaces[i].IsFollowing = false
@@ -151,23 +151,23 @@ func (s *spacesRetriever) Query(ctx context.Context, request types.SpacesQueryRe
 }
 func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowRequest) (string, error) {
 	var SpaceFollower model.SpaceFollower
-	var user model.Jpa_web_authn_user
+	var user model.User
 	var space model.Space
 	success := "Follow Success"
 	deSession := s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	deSession = deSession.Model(user).Where("name = ?", request.Username)
 	res := deSession.First(&user)
 
 	if res.Error != nil {
 		return "false", nil
 	}
 	deSession = s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.SpaceId)
+	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.ID, request.SpaceId)
 
 	res1 := deSession.First(&SpaceFollower)
 
 	if res1.Error != nil {
-		Follower := model.SpaceFollower{SpaceId: request.SpaceId, ParticipantId: user.Id, IsFollowing: true}
+		Follower := model.SpaceFollower{SpaceId: request.SpaceId, ParticipantId: user.ID, IsFollowing: true}
 		deSession = s.db.Session(&gorm.Session{})
 		result := deSession.Create(&Follower) // 通过数据的指针来创建
 		if result.Error != nil {
@@ -189,19 +189,19 @@ func (s *spacesRetriever) Follow(ctx context.Context, request types.FollowReques
 }
 func (s *spacesRetriever) UnFollow(ctx context.Context, request types.FollowRequest) (string, error) {
 	var SpaceFollower model.SpaceFollower
-	var user model.Jpa_web_authn_user
+	var user model.User
 	var space model.Space
 	deSession := s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	deSession = deSession.Model(user).Where("name = ?", request.Username)
 	res := deSession.First(&user)
 	if res.Error != nil {
 		return "false", nil
 	}
 	deSession = s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.SpaceId)
+	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.ID, request.SpaceId)
 	res = deSession.First(&SpaceFollower)
 	if res.Error != nil {
-		Follower := model.SpaceFollower{SpaceId: request.SpaceId, ParticipantId: user.Id, IsFollowing: false}
+		Follower := model.SpaceFollower{SpaceId: request.SpaceId, ParticipantId: user.ID, IsFollowing: false}
 		result := deSession.Create(&Follower) // 通过数据的指针来创建
 		if result.Error != nil {
 			return "false", nil

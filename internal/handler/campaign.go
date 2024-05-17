@@ -15,6 +15,7 @@ import (
 type ICampaignHandler interface {
 	Create(c *gin.Context)
 	Query(c *gin.Context)
+	TelegramisFollow(c *gin.Context)
 }
 
 type campaignHandler struct {
@@ -58,7 +59,29 @@ func (h *campaignHandler) Query(c *gin.Context) {
 
 	// db handle campaign query
 
-	res, err := h.retriever.Query(c, *form)
+	res, _ := h.retriever.Query(c, *form)
+
+	// assume we got all the data
+	response.OutPut(c, response.WithCodeMessage{
+		Code:    62001,
+		Message: "campaign query success",
+	}, res)
+}
+
+func (h *campaignHandler) TelegramisFollow(c *gin.Context) {
+	form := &types.TelegramIsFollowRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+
+	// db handle campaign query
+
+	res, _ := h.retriever.TelegramisFollow(c, *form)
 
 	// assume we got all the data
 	response.OutPut(c, response.WithCodeMessage{

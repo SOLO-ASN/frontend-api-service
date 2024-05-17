@@ -6,7 +6,6 @@ import (
 	"api-service/internal/types"
 	"context"
 	"errors"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -30,7 +29,7 @@ func NewSpaceRetriever(db *gorm.DB, cache *cache.Cache) SpaceRetriever {
 
 func (s spaceRetriever) Create(c context.Context, request *types.SpaceCreateRequest) (string, error) {
 	var space model.Space
-	var user model.Jpa_web_authn_user
+	var user model.User
 	space.Name = request.Name
 	space.Alias = request.Alias
 	space.Categories = request.Categories
@@ -38,10 +37,10 @@ func (s spaceRetriever) Create(c context.Context, request *types.SpaceCreateRequ
 	space.Info = request.Info
 	space.Thumbnail = request.Thumbnail
 	deSession := s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	deSession = deSession.Model(user).Where("name = ?", request.Username)
 	deSession.First(&user)
 
-	space.Owner = strconv.FormatInt(int64(user.Id), 10)
+	space.Owner = user.ID
 
 	deSession = s.db.Session(&gorm.Session{})
 	result := deSession.Create(&space) // 通过数据的指针来创建
@@ -54,13 +53,12 @@ func (s spaceRetriever) Create(c context.Context, request *types.SpaceCreateRequ
 }
 
 /*
-
  */
 func (s spaceRetriever) Query(c context.Context, request types.SpaceQueryRequest) (*model.Space, error) {
 	var space model.Space
 	var token model.Token
 	var SpaceFollower model.SpaceFollower
-	var user model.Jpa_web_authn_user
+	var user model.User
 
 	deSession := s.db.Session(&gorm.Session{})
 	if err := deSession.First(&space, "id = ?", request.Id).Error; err != nil {
@@ -90,13 +88,13 @@ func (s spaceRetriever) Query(c context.Context, request types.SpaceQueryRequest
 
 	space.Token = token
 	deSession = s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(user).Where("username = ?", request.Username)
+	deSession = deSession.Model(user).Where("name = ?", request.Username)
 	deSession.First(&user)
 	deSession = s.db.Session(&gorm.Session{})
-	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.Id, request.Id)
+	deSession = deSession.Model(SpaceFollower).Where("participantId = ? AND spaceId = ? ", user.ID, request.Id)
 	deSession.First(&SpaceFollower)
 	space.IsFollowing = SpaceFollower.IsFollowing
-	if space.Owner == strconv.FormatInt(int64(user.Id), 10) {
+	if space.Owner == user.ID {
 		space.IsOwner = true
 	}
 	return &space, nil
