@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -122,7 +123,45 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 
 func (u *userHandler) UpdateAddressById(c *gin.Context) {
 	//TODO implement me
-	panic("implement me")
+	form := &types.UpdateAddressRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		})
+	}
+	// todo check login
+	if form.Name == "" {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "NOT_LOGIN",
+		})
+		return
+	}
+	// todo check signed message !!!
+
+	// add to db
+	userBindAddress := &model.User{
+		ChainAddress: model.ChainAddress{
+			UUID:     "", // temperary muted
+			MainAddr: &form.Address,
+		},
+		Name: form.Name,
+	}
+
+	err = u.retriever.UpdateById(c, userBindAddress)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusInternalServerError,
+			Message: "update address error",
+		})
+		fmt.Println(">>>>>>>>>>>>>>", err)
+		return
+	}
+
+	response.Success(c, gin.H{"status": "update success"})
+
 }
 
 func (u *userHandler) CheckDuplicate(c *gin.Context) {
@@ -154,7 +193,7 @@ func (u *userHandler) Create(c *gin.Context) {
 		c.JSON(32001, "invalid params") // todo refactor
 		return
 	}
-	
+
 	user := &model.User{}
 	user.Name = form.Name
 	user.Avatar = form.Avatar

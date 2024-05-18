@@ -7,7 +7,7 @@ type ChainAddress struct {
 	//EthLike []EthChainAddress
 }
 
-type EthChainAddress struct {
+type EthChainAddgitress struct {
 	UUID     string `gorm:"column:uuid;type:varchar(36)" json:"uuid"`
 	UserName string `gorm:"column:user_name;type:varchar(50);NOT"`
 

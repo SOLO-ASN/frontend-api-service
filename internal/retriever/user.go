@@ -118,7 +118,13 @@ func (u userRetriever) UpdateEmailById(ctx context.Context, table *model.User) e
 
 func (u userRetriever) UpdateById(ctx context.Context, table *model.User) error {
 	//TODO implement me
-	panic("implement me")
+	updates := make(map[string]interface{})
+	updates["uuid"] = table.ChainAddress.UUID
+	updates["main_addr"] = table.ChainAddress.MainAddr
+	if err := u.db.Model(table).Where("name = ?", table.Name).Updates(updates).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u userRetriever) DeleteById(ctx context.Context, uuid string) error {

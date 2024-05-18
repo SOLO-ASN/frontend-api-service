@@ -17,6 +17,13 @@ type GetUserResponse struct {
 	Email  string `json:"email"`
 }
 
+type UpdateAddressRequest struct {
+	Name    string `json:"username"`
+	Address string `json:"address" binding:""`
+	Network string `json:"network" binding:""`
+	Signed  string `json:"signed_message" binding:""`
+}
+
 type UpdateSocialAccountRequest struct {
 	UserName        string `json:"username" binding:""`
 	XAccount        x      `json:"xAccount" binding:""`
