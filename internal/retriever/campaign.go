@@ -334,7 +334,10 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 	json.Unmarshal(campaign.CredentialGroups, &credentialGroupIds)
 	deSession = cam.db.Session(&gorm.Session{})
 	deSession = deSession.Model(participant).Where("name = ?", queryRequest.Username)
-	deSession.First(&participant)
+	res2 := deSession.First(&participant)
+	if res2.Error != nil {
+		//return "NO_USER", nil
+	}
 
 	for _, credentialGroupid := range credentialGroupIds.Ids {
 
@@ -367,17 +370,21 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 			deSession = deSession.Model(credential).Where("credentialGroupId = ?", credentialGroupid)
 			deSession.Find(&credentials)
 			for _, credential := range credentials {
+				var credenParticipant model.CredentialParticipant
 				deSession = cam.db.Session(&gorm.Session{})
-				deSession = deSession.Model(CredentialParticipant).Where("credentialId = ? AND participantId= ? ", credential.ID, participant.ID)
-				deSession.Find(&CredentialParticipants)
-				for _, credParticipant := range CredentialParticipants {
-					if credParticipant.Status != true {
-						deSession1 := cam.db.Session(&gorm.Session{})
-						credentialGrouppart.Status = false
-						deSession1.Model(credentialGroupParticipant).Save(&credentialGrouppart)
-						return "NOT_COMPLETE", nil
-					}
+				deSession = deSession.Model(credenParticipant).Where("credentialId = ? AND participantId= ? ", credential.ID, participant.ID)
+				res3 := deSession.Find(&credenParticipant)
+				if res3.Error != nil {
+					return "NOT_COMPLETE", nil
 				}
+
+				if credenParticipant.Status != true {
+					deSession1 := cam.db.Session(&gorm.Session{})
+					credentialGrouppart.Status = false
+					deSession1.Model(credentialGroupParticipant).Save(&credentialGrouppart)
+					return "NOT_COMPLETE", nil
+				}
+
 				deSession1 := cam.db.Session(&gorm.Session{})
 				credentialGrouppart.Status = true
 				deSession1.Model(credentialGroupParticipant).Save(&credentialGrouppart)
@@ -385,9 +392,9 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 
 		}
 
-		deSession = cam.db.Session(&gorm.Session{})
-		deSession = deSession.Model(credentialGroup).Where("id = ?", credentialGroupid)
-		deSession.First(&credentialGroup)
+		// deSession = cam.db.Session(&gorm.Session{})
+		// deSession = deSession.Model(credentialGroup).Where("id = ?", credentialGroupid)
+		// deSession.First(&credentialGroup)
 		//credentialGroups = append(credentialGroups, credentialGroup)
 
 		deSession = cam.db.Session(&gorm.Session{})
@@ -396,7 +403,10 @@ func (cam *campaignRetriever) IsComplete(c context.Context, queryRequest types.C
 		for _, credential := range credentials {
 			deSession = cam.db.Session(&gorm.Session{})
 			deSession = deSession.Model(CredentialParticipant).Where("credentialId = ? AND participantId= ? ", credential.ID, participant.ID)
-			deSession.Find(&CredentialParticipants)
+			res4 := deSession.First(&CredentialParticipant)
+			if res4.Error != nil {
+				return "NOT_COMPLETE", nil
+			}
 			for _, credParticipant := range CredentialParticipants {
 
 				if !credParticipant.Status {
