@@ -27,6 +27,8 @@ func main() {
 
 	// init mysql
 	model.InitMysql()
+	// init redis
+	model.InitRedis()
 
 	host := defaultHTTPAddr
 

@@ -34,7 +34,7 @@ func Init(dsn string, cType string, opts ...OptionFn) (ICache, error) {
 	opt.apply(opts...)
 
 	if cType == "redis" {
-		rdb := NewRedisClient(dsn, opt)
+		rdb := NewRedisClient(dsn, opts...)
 		if rdb == nil {
 			return nil, ErrCacheGenerate
 		}

@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"crypto/tls"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	"api-service/internal/dbEntity/cache"
 	"api-service/internal/middleware/logger"
@@ -11,9 +14,9 @@ import (
 	"api-service/internal/response"
 	"api-service/internal/retriever"
 	"api-service/internal/types"
-
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gopkg.in/gomail.v2"
 )
 
 type IUserHandler interface {
@@ -27,6 +30,8 @@ type IUserHandler interface {
 	UpdateAddressById(c *gin.Context)
 	DeleteById(c *gin.Context)
 	CheckTwitterAccount(c *gin.Context)
+	SendCode(c *gin.Context)
+	VerifyCode(c *gin.Context)
 }
 
 func NewUserHandler() IUserHandler {
@@ -40,6 +45,78 @@ func NewUserHandler() IUserHandler {
 
 type userHandler struct {
 	retriever retriever.UserRetriever
+}
+
+func generateCode(length int) string {
+	// 生成随机验证码
+	rand.Seed(time.Now().UnixNano())
+	//chars := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	chars := "0123456789"
+	bytes := make([]byte, length)
+	for i := range bytes {
+		bytes[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(bytes)
+}
+
+func (u *userHandler) SendCode(c *gin.Context) {
+	// parse request
+	form := &types.SendVerificationCodeRequest{}
+	err := c.ShouldBindJSON(form)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "invalid request parameters",
+		}, err)
+		return
+	}
+
+	// get dialer
+	d, exist := c.Get("emailDialer")
+	if !exist {
+		newdialer := gomail.NewDialer(
+			"smtp-mail.outlook.com",
+			587,
+			"solo-mission-webcode@outlook.com",
+			"password@solomissioN")
+		newdialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		d = newdialer
+
+		c.Set("emailDialer", newdialer)
+	}
+	//
+	code := generateCode(6)
+	err = model.GetCacheDb().Set(fmt.Sprintf("verificationCode:%s", form.Email), code)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "Send email code failed!",
+		})
+		return
+	}
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", "solo-mission-webcode@outlook.com")
+	m.SetHeader("To", form.Email)
+	m.SetHeader("Subject", "The verification code for Solo-Mission!")
+	m.SetBody("text/html", fmt.Sprintf("Your verification code is: %s , The verification code is valid for 5 minutes. Please do not reply to this email!", code))
+	// send the email
+	if err := d.(*gomail.Dialer).DialAndSend(m); err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "Send email code failed!",
+		})
+	}
+	// store to context
+	// format: verificationCode:email
+	c.Set(fmt.Sprintf("verificationCode:%s", form.Email), code)
+
+	// response
+	response.Success(c, gin.H{"status": "send email code success"})
+}
+
+func (u *userHandler) VerifyCode(c *gin.Context) {
+	u.UpdateEmailById(c)
 }
 
 func (u *userHandler) UpdateSocialAccountById(c *gin.Context) {
@@ -101,12 +178,27 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 	}
 
 	// todo verify address and verification code
+	if form.UserName == "" {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "NOT_LOGIN",
+		})
+		return
+	}
+
+	// check verification code
+	code, err := model.GetCacheDb().Get(fmt.Sprintf("verificationCode:%s", form.Email))
+	if err != nil && code.(string) != form.VerificationCode {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusBadRequest,
+			Message: "verification code not valid",
+		})
+		return
+	}
 
 	// update email
 	e := &model.User{
-		Model: model.Model{
-			ID: c.GetString("uuid"),
-		},
+		Name:  form.UserName,
 		Email: &form.Email,
 	}
 	err = u.retriever.UpdateEmailById(c, e)
@@ -115,6 +207,7 @@ func (u *userHandler) UpdateEmailById(c *gin.Context) {
 			Code:    http.StatusInternalServerError,
 			Message: "update email error",
 		})
+		return
 	}
 
 	response.Success(c, gin.H{"status": "update success"})

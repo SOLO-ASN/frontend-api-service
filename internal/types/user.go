@@ -1,5 +1,9 @@
 package types
 
+type SendVerificationCodeRequest struct {
+	Email string `json:"email" binding:"required"`
+}
+
 type CheckDuplicateRequest struct {
 	Name string `json:"name" binding:"required"`
 }
@@ -38,9 +42,9 @@ type x struct {
 }
 
 type UpdateEmailRequest struct {
-	Address          string `json:"address" binding:""`
+	UserName         string `json:"username" binding:""`
 	Email            string `json:"email" binding:""`
-	VerificationCode string `json:"verificationCode" binding:""`
+	VerificationCode string `json:"code" binding:""`
 }
 
 type CheckTwitterAccountResponse struct {

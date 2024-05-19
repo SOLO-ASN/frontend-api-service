@@ -2,6 +2,7 @@ package model
 
 import (
 	"api-service/config"
+	"api-service/internal/dbEntity/cache"
 	"api-service/internal/dbEntity/mysql"
 	"api-service/internal/middleware/logger"
 	"errors"
@@ -11,7 +12,8 @@ import (
 )
 
 var (
-	db *gorm.DB
+	db      *gorm.DB
+	cacheDb *cache.Client
 )
 
 var (
@@ -53,4 +55,26 @@ func GetDb(init bool) *gorm.DB {
 		InitMysql()
 	}
 	return db
+}
+
+func InitRedis() {
+	cacheOpts := []cache.OptionFn{
+		cache.WithDialTimeout(30),
+		cache.WithReadTimeout(10),
+		cache.WithWriteTimeout(10),
+	}
+
+	cacheDb = cache.NewRedisClientWithPassword(
+		config.Get().Redis.AddressList[0],
+		config.Get().Redis.Password,
+		config.Get().Redis.DB,
+		cacheOpts...,
+	)
+}
+
+func GetCacheDb() *cache.Client {
+	if cacheDb == nil {
+		InitRedis()
+	}
+	return cacheDb
 }

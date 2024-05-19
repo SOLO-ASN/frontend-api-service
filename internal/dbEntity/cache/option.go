@@ -9,10 +9,12 @@ type option struct {
 	DialTimeout  time.Duration
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
+	Db           int
 }
 
 func defaultOption() *option {
 	return &option{
+		Db:           0,
 		EnableTrace:  false,
 		DialTimeout:  30 * time.Second,
 		ReadTimeout:  300 * time.Second,
