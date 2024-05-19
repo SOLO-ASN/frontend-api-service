@@ -9,9 +9,9 @@ app:
   level: "info"
   path: "./logs/log"
 
-cache:
+redis:
   enableCluster: false
-  addressList: ["redis://127.0.0.1:6379"]
+  addressList: ["127.0.0.1:63790"]
   password: ""
   db: 0
   prefix: ""
