@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"api-service/internal/middleware/jwt"
 	"crypto/tls"
 	"fmt"
 	"math/rand"
@@ -32,6 +33,7 @@ type IUserHandler interface {
 	CheckTwitterAccount(c *gin.Context)
 	SendCode(c *gin.Context)
 	VerifyCode(c *gin.Context)
+	ParseFidoList(c *gin.Context)
 }
 
 func NewUserHandler() IUserHandler {
@@ -45,6 +47,30 @@ func NewUserHandler() IUserHandler {
 
 type userHandler struct {
 	retriever retriever.UserRetriever
+}
+
+func (u *userHandler) ParseFidoList(c *gin.Context) {
+	jwtString := c.GetHeader("Authorization")
+	claims, err := jwt.ParseTokenIntoClaims(jwtString)
+	if err != nil {
+		response.Error(c, response.WithCodeMessage{
+			Code:    http.StatusUnauthorized,
+			Message: "unauthorized.",
+		}, err)
+		return
+	}
+	response.Success(c, gin.H{"claims": claims})
+
+	// currently not use jwt middleware
+
+	//if claims, ok := c.Get("claims"); !ok {
+	//	response.Error(c, response.WithCodeMessage{
+	//		Code:    http.StatusUnauthorized,
+	//		Message: "unauthorized.",
+	//	})
+	//} else {
+	//	response.Success(c, gin.H{"claims": claims})
+	//}
 }
 
 func generateCode(length int) string {

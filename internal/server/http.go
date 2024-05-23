@@ -54,6 +54,7 @@ func (h *httpServer) Start() error {
 func (h *httpServer) Stop() error {
 	//TODO implement me
 	fmt.Println("stop http server")
+	h.server.Close()
 	return nil
 }
 

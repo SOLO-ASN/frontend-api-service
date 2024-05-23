@@ -4,7 +4,6 @@ import (
 	"api-service/config"
 	"api-service/internal/handler"
 	"api-service/internal/middleware"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,6 +38,9 @@ func NewRouter() *gin.Engine {
 	r.Use(gin.Recovery())
 	// use cors middleware
 	r.Use(middleware.Cors())
+	// use jwt middleware
+	// currently not use
+	//r.Use(jwt.JWTMiddleware())
 
 	r.GET(base_path+"/health", handler.CheckHealth)
 

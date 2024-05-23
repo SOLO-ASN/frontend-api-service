@@ -81,10 +81,11 @@ type Mysql struct {
 }
 
 type Middleware struct {
-	EnableCircuitBreaker bool `yaml:"enableCircuitBreaker" json:"enableCircuitBreaker"` // circuit breaker
-	EnableRateLimit      bool `yaml:"enableRateLimit" json:"enableRateLimit"`           // rate limit
-	EnableMetrics        bool `yaml:"enableMetrics" json:"enableMetrics"`               // metrics
-	EnableTrace          bool `yaml:"enableTrace" json:"enableTrace"`                   // trace
+	EnableCircuitBreaker bool   `yaml:"enableCircuitBreaker" json:"enableCircuitBreaker"` // circuit breaker
+	EnableRateLimit      bool   `yaml:"enableRateLimit" json:"enableRateLimit"`           // rate limit
+	EnableMetrics        bool   `yaml:"enableMetrics" json:"enableMetrics"`               // metrics
+	EnableTrace          bool   `yaml:"enableTrace" json:"enableTrace"`                   // trace
+	JWTSecret            string `yaml:"jwtSecret" json:"jwtSecret"`
 }
 
 func (c *Config) parse() error {

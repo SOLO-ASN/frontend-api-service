@@ -29,3 +29,4 @@ middleware:
   enableRateLimit: false
   enableMetrics: false
   enableTrace: false
+  jwtSecret: "s3cr3tkeyf0rjwt1234567890abcd123"

@@ -38,4 +38,6 @@ func userIdGroup(rg *gin.RouterGroup, h handler.IUserHandler) {
 	rg.POST("/email/sendCode", h.SendCode)
 	// verify email
 	rg.POST("/email/verifyCode", h.VerifyCode)
+	// parse fido list
+	rg.POST("/parseFidoList", h.ParseFidoList)
 }
