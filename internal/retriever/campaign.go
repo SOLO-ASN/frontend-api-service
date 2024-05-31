@@ -261,7 +261,8 @@ func (t *campaignRetriever) TelegramisFollow(ctx context.Context, request types.
 	}
 
 	member, _ := b.GetChatMember(context.Background(), &param)
-	if member.Owner == nil {
+
+	if member.Member.User == nil {
 		return "NO_FOLLLOW", nil
 	}
 	deSession = t.db.Session(&gorm.Session{})
